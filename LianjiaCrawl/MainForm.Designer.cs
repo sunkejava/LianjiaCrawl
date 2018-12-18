@@ -41,6 +41,8 @@
             this.Panel_xj = new LayeredSkin.Controls.LayeredPanel();
             this.lp_panel = new LayeredSkin.Controls.LayeredPanel();
             this.label_count = new LayeredSkin.Controls.LayeredLabel();
+            this.label_nowcrawlpage = new LayeredSkin.Controls.LayeredLabel();
+            this.label_pagecount = new LayeredSkin.Controls.LayeredLabel();
             this.SuspendLayout();
             // 
             // layeredButton_mini
@@ -382,6 +384,50 @@
             this.label_count.Text = "当前找到 0 套北京在售房源";
             this.label_count.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // label_nowcrawlpage
+            // 
+            this.label_nowcrawlpage.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.label_nowcrawlpage.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.label_nowcrawlpage.Borders.BottomWidth = 1;
+            this.label_nowcrawlpage.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.label_nowcrawlpage.Borders.LeftWidth = 1;
+            this.label_nowcrawlpage.Borders.RightColor = System.Drawing.Color.Empty;
+            this.label_nowcrawlpage.Borders.RightWidth = 1;
+            this.label_nowcrawlpage.Borders.TopColor = System.Drawing.Color.Empty;
+            this.label_nowcrawlpage.Borders.TopWidth = 1;
+            this.label_nowcrawlpage.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("label_nowcrawlpage.Canvas")));
+            this.label_nowcrawlpage.Font = new System.Drawing.Font("宋体", 12F);
+            this.label_nowcrawlpage.ForeColor = System.Drawing.Color.Red;
+            this.label_nowcrawlpage.HaloSize = 5;
+            this.label_nowcrawlpage.Location = new System.Drawing.Point(303, 639);
+            this.label_nowcrawlpage.Name = "label_nowcrawlpage";
+            this.label_nowcrawlpage.Size = new System.Drawing.Size(708, 25);
+            this.label_nowcrawlpage.TabIndex = 22;
+            this.label_nowcrawlpage.Text = "正在获取全部第 ？ 页 信息";
+            this.label_nowcrawlpage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label_pagecount
+            // 
+            this.label_pagecount.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.label_pagecount.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.label_pagecount.Borders.BottomWidth = 1;
+            this.label_pagecount.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.label_pagecount.Borders.LeftWidth = 1;
+            this.label_pagecount.Borders.RightColor = System.Drawing.Color.Empty;
+            this.label_pagecount.Borders.RightWidth = 1;
+            this.label_pagecount.Borders.TopColor = System.Drawing.Color.Empty;
+            this.label_pagecount.Borders.TopWidth = 1;
+            this.label_pagecount.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("label_pagecount.Canvas")));
+            this.label_pagecount.Font = new System.Drawing.Font("宋体", 12F);
+            this.label_pagecount.ForeColor = System.Drawing.Color.Red;
+            this.label_pagecount.HaloSize = 5;
+            this.label_pagecount.Location = new System.Drawing.Point(12, 639);
+            this.label_pagecount.Name = "label_pagecount";
+            this.label_pagecount.Size = new System.Drawing.Size(186, 25);
+            this.label_pagecount.TabIndex = 23;
+            this.label_pagecount.Text = "总页数：215";
+            this.label_pagecount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // MainForm
             // 
             this.AnimationType = LayeredSkin.Forms.AnimationTypes.GradualCurtainEffect;
@@ -390,6 +436,8 @@
             this.BackColor = System.Drawing.Color.Gray;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1023, 710);
+            this.Controls.Add(this.label_pagecount);
+            this.Controls.Add(this.label_nowcrawlpage);
             this.Controls.Add(this.label_count);
             this.Controls.Add(this.lp_panel);
             this.Controls.Add(this.Panel_xj);
@@ -427,6 +475,8 @@
         private LayeredSkin.Controls.LayeredPanel Panel_xj;
         private LayeredSkin.Controls.LayeredPanel lp_panel;
         public LayeredSkin.Controls.LayeredLabel label_count;
+        public LayeredSkin.Controls.LayeredLabel label_nowcrawlpage;
+        public LayeredSkin.Controls.LayeredLabel label_pagecount;
     }
 }
 

@@ -29,6 +29,8 @@ namespace LianjiaCrawl
         public static List<Entity.SelectEntity> subways = new List<Entity.SelectEntity>();
         public static List<Entity.SelectEntity> selectChidens = new List<Entity.SelectEntity>();
         public static string findCountHouse = "";
+        public static string yjname = "全部";
+        public static string ejname = "";
         private void layeredButton_mini_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -121,6 +123,7 @@ namespace LianjiaCrawl
 
         private void Button_area_Click(object sender, EventArgs e)
         {
+            //yjname =(sender as DuiButton).Text;
             Panel_sc.DUIControls.Clear();
             Panel_xj.DUIControls.Clear();
             addSelectControls(areas);
@@ -129,6 +132,7 @@ namespace LianjiaCrawl
         private void BaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
             selectChidens.Clear();
+            ejname = (sender as DuiButton).Text;
             string url = (sender as DuiButton).Name.Replace("baseButton_", "");
             //根据所选地区或线路获取子信息
             var htmlStr = GetWebClient(url);
@@ -211,6 +215,7 @@ namespace LianjiaCrawl
 
         private void Button_subway_Click(object sender, EventArgs e)
         {
+            //yjname = (sender as DuiButton).Text;
             Panel_sc.DUIControls.Clear();
             Panel_xj.DUIControls.Clear();
             addSelectControls(subways);
@@ -319,7 +324,24 @@ namespace LianjiaCrawl
                 }
             }
             //当前页数、总页数
-
+            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
+            string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
+            JObject jo = (JObject)JsonConvert.DeserializeObject(str);
+            string pcount = "";
+            string npage = "";
+            foreach (var item in jo)
+            {
+                if (item.Key.Contains("totalPage"))
+                {
+                    pcount = item.Value.ToString();
+                }
+                else
+                {
+                    npage = item.Value.ToString();
+                }
+            }
+            label_pagecount.Text = "总页数：" + pcount;
+            label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的信息！";
         }
     }
 }
