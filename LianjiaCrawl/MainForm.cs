@@ -14,6 +14,7 @@ using LayeredSkin.DirectUI;
 using System.Web.Script.Serialization;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LianjiaCrawl
 {
@@ -27,6 +28,7 @@ namespace LianjiaCrawl
         public static List<Entity.SelectEntity> areas = new List<Entity.SelectEntity>();
         public static List<Entity.SelectEntity> subways = new List<Entity.SelectEntity>();
         public static List<Entity.SelectEntity> selectChidens = new List<Entity.SelectEntity>();
+        public static string findCountHouse = "";
         private void layeredButton_mini_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -48,7 +50,7 @@ namespace LianjiaCrawl
         {
             getAreasAndSubway();
         }
-        public static string GetWebClient(string url)
+        public string GetWebClient(string url)
         {
             try
             {
@@ -70,7 +72,7 @@ namespace LianjiaCrawl
         /// <summary>
         /// 获取地区及地铁信息
         /// </summary>
-        public static void getAreasAndSubway()
+        public void getAreasAndSubway()
         {
             var htmlStr = GetWebClient(mainUrl);
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -112,6 +114,9 @@ namespace LianjiaCrawl
                     Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
                 }
             }
+            //当前总共找到XX个房源信息
+            getFindallHous(doc);
+            getAllCrawlText(doc);
         }
 
         private void Button_area_Click(object sender, EventArgs e)
@@ -152,14 +157,36 @@ namespace LianjiaCrawl
                 var ress = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]/div[2]/@data-d[1]");
                 string rastr = ress.OuterHtml.Replace("<div class=\"sub_sub_nav sbw_sub_nav\" id=\"sbw_line\" data-d='", "").Replace("' class=\"div_relative\">", "").Replace("</div>", "").Replace(" ","");
                 rastr = Unicode2String(rastr);
-                JavaScriptSerializer jss = new JavaScriptSerializer();
-                List<Entity.SubwayEntity> ListSubwat = (List<Entity.SubwayEntity>)JsonConvert.DeserializeObject(rastr);
-                foreach (Entity.SubwayEntity item in ListSubwat)
+                JObject jo = (JObject)JsonConvert.DeserializeObject(rastr);
+                foreach (var item in jo)
                 {
-                    Console.WriteLine(item.Id + "---" + item.Name);
+                    Console.WriteLine(item.Value["name"].ToString()+"---"+item.Value["url"].ToString());
+                    Entity.SelectEntity se = new Entity.SelectEntity();
+                    se.Name = item.Value["name"].ToString();
+                    se.Rtag = item.Value["name"].ToString();
+                    se.Url = item.Value["url"].ToString();
+                    selectChidens.Add(se);
                 }
             }
+            //当前总共找到XX个房源信息
+            getFindallHous(doc);
+            getAllCrawlText(doc);
             addSelectChiendControls(selectChidens);
+        }
+        private void getFindallHous(HtmlAgilityPack.HtmlDocument doc)
+        {
+            //当前总共找到XX个房源信息
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
+                foreach (var item in astr)
+                {
+                    var count = item.InnerText;
+                    findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
+                }
+            }
+            this.label_count.Text = findCountHouse;
         }
         /// <summary>
         /// Unicode转字符串
@@ -178,24 +205,8 @@ namespace LianjiaCrawl
             var htmlStr = GetWebClient(url);
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(htmlStr);
-            //子信息
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]/div[2]");
-            if (res != null)
-            {
-                var astr = res.SelectNodes("a");
-                foreach (var item in astr)
-                {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.InnerText;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    area.Url = "https://bj.lianjia.com" + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    selectChidens.Add(area);
-                }
-            }
-            addSelectChiendControls(selectChidens);
+            getFindallHous(doc);
+            getAllCrawlText(doc);
         }
 
         private void Button_subway_Click(object sender, EventArgs e)
@@ -209,7 +220,7 @@ namespace LianjiaCrawl
         {
             Panel_sc.DUIControls.Clear();
             DuiBaseControl baseControl = new DuiBaseControl();
-            baseControl.Size = new Size(735, 78);
+            baseControl.Size = new Size(999, 78);
             baseControl.Location = new Point(0, 0);
             baseControl.Dock = DockStyle.Fill;
             int i = 1;
@@ -246,7 +257,7 @@ namespace LianjiaCrawl
         {
             Panel_xj.DUIControls.Clear();
             DuiBaseControl baseControl = new DuiBaseControl();
-            baseControl.Size = new Size(735, 78);
+            baseControl.Size = new Size(999, 78);
             baseControl.Location = new Point(0, 0);
             baseControl.Dock = DockStyle.Fill;
             int i = 1;
@@ -277,6 +288,38 @@ namespace LianjiaCrawl
                 baseControl.Controls.Add(baseButton);
             }
             Panel_xj.DUIControls.Add(baseControl);
+        }
+
+        /// <summary>
+        /// 获取房源信息
+        /// </summary>
+        /// <param name="doc"></param>
+        private void getAllCrawlText(HtmlAgilityPack.HtmlDocument doc)
+        {
+            DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+            duia.Dock = DockStyle.Fill;
+            duia.Multiline = true;
+            duia.Size = new Size(999,389);
+            duia.Text = "";
+            //当前总共找到XX个房源信息
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
+                int i = 1;
+                foreach (var item in astr)
+                {
+                    if (item.Attributes["class"].Value != "list_app_daoliu")
+                    {
+                        var itemstr = item.SelectNodes("a")[0];
+                        string astrs = i.ToString()+"----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value;
+                        duia.Text += astrs + "\r\n";
+                        i++;
+                    }
+                }
+            }
+            //当前页数、总页数
+
         }
     }
 }

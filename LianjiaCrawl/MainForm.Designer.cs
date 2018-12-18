@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            LayeredSkin.DirectUI.DuiTextBox duiTextBox1 = new LayeredSkin.DirectUI.DuiTextBox();
             this.layeredButton_mini = new LayeredSkin.Controls.LayeredButton();
             this.layeredButton_close = new LayeredSkin.Controls.LayeredButton();
             this.Bar_kzt = new LayeredSkin.Controls.LayeredTrackBar();
@@ -38,6 +39,8 @@
             this.Button_subway = new LayeredSkin.Controls.LayeredButton();
             this.Panel_sc = new LayeredSkin.Controls.LayeredPanel();
             this.Panel_xj = new LayeredSkin.Controls.LayeredPanel();
+            this.lp_panel = new LayeredSkin.Controls.LayeredPanel();
+            this.label_count = new LayeredSkin.Controls.LayeredLabel();
             this.SuspendLayout();
             // 
             // layeredButton_mini
@@ -59,7 +62,7 @@
             this.layeredButton_mini.HaloSize = 5;
             this.layeredButton_mini.HoverImage = ((System.Drawing.Image)(resources.GetObject("layeredButton_mini.HoverImage")));
             this.layeredButton_mini.IsPureColor = false;
-            this.layeredButton_mini.Location = new System.Drawing.Point(691, 3);
+            this.layeredButton_mini.Location = new System.Drawing.Point(967, 3);
             this.layeredButton_mini.Name = "layeredButton_mini";
             this.layeredButton_mini.NormalImage = ((System.Drawing.Image)(resources.GetObject("layeredButton_mini.NormalImage")));
             this.layeredButton_mini.PressedImage = null;
@@ -91,7 +94,7 @@
             this.layeredButton_close.HaloSize = 5;
             this.layeredButton_close.HoverImage = ((System.Drawing.Image)(resources.GetObject("layeredButton_close.HoverImage")));
             this.layeredButton_close.IsPureColor = false;
-            this.layeredButton_close.Location = new System.Drawing.Point(729, 3);
+            this.layeredButton_close.Location = new System.Drawing.Point(989, 3);
             this.layeredButton_close.Name = "layeredButton_close";
             this.layeredButton_close.NormalImage = ((System.Drawing.Image)(resources.GetObject("layeredButton_close.NormalImage")));
             this.layeredButton_close.PressedImage = null;
@@ -121,7 +124,7 @@
             this.Bar_kzt.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("Bar_kzt.Canvas")));
             this.Bar_kzt.ControlRectangle = new System.Drawing.Rectangle(5, 5, 269, 9);
             this.Bar_kzt.LineWidth = 2;
-            this.Bar_kzt.Location = new System.Drawing.Point(324, 3);
+            this.Bar_kzt.Location = new System.Drawing.Point(417, 3);
             this.Bar_kzt.MouseCanControl = true;
             this.Bar_kzt.Name = "Bar_kzt";
             this.Bar_kzt.Orientation = LayeredSkin.Controls.Orientations.Horizontal;
@@ -150,7 +153,7 @@
             this.layeredLabel1.Borders.TopWidth = 1;
             this.layeredLabel1.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("layeredLabel1.Canvas")));
             this.layeredLabel1.HaloSize = 5;
-            this.layeredLabel1.Location = new System.Drawing.Point(273, 6);
+            this.layeredLabel1.Location = new System.Drawing.Point(366, 6);
             this.layeredLabel1.Name = "layeredLabel1";
             this.layeredLabel1.Size = new System.Drawing.Size(53, 17);
             this.layeredLabel1.TabIndex = 7;
@@ -258,7 +261,7 @@
             this.Panel_sc.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("Panel_sc.Canvas")));
             this.Panel_sc.Location = new System.Drawing.Point(12, 66);
             this.Panel_sc.Name = "Panel_sc";
-            this.Panel_sc.Size = new System.Drawing.Size(735, 78);
+            this.Panel_sc.Size = new System.Drawing.Size(999, 78);
             this.Panel_sc.TabIndex = 11;
             // 
             // Panel_xj
@@ -277,8 +280,107 @@
             this.Panel_xj.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("Panel_xj.Canvas")));
             this.Panel_xj.Location = new System.Drawing.Point(12, 145);
             this.Panel_xj.Name = "Panel_xj";
-            this.Panel_xj.Size = new System.Drawing.Size(735, 78);
+            this.Panel_xj.Size = new System.Drawing.Size(999, 78);
             this.Panel_xj.TabIndex = 12;
+            // 
+            // lp_panel
+            // 
+            this.lp_panel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lp_panel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.lp_panel.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.lp_panel.Borders.BottomWidth = 1;
+            this.lp_panel.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.lp_panel.Borders.LeftWidth = 1;
+            this.lp_panel.Borders.RightColor = System.Drawing.Color.Empty;
+            this.lp_panel.Borders.RightWidth = 1;
+            this.lp_panel.Borders.TopColor = System.Drawing.Color.Empty;
+            this.lp_panel.Borders.TopWidth = 1;
+            this.lp_panel.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("lp_panel.Canvas")));
+            duiTextBox1.AutoHeight = false;
+            duiTextBox1.AutoSize = false;
+            duiTextBox1.BackColor = System.Drawing.Color.DarkOliveGreen;
+            duiTextBox1.BackgroundImage = null;
+            duiTextBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            duiTextBox1.BackgroundRender = null;
+            duiTextBox1.BitmapCache = false;
+            duiTextBox1.BorderPath = null;
+            duiTextBox1.BorderRender = null;
+            duiTextBox1.Borders.BottomColor = System.Drawing.Color.Empty;
+            duiTextBox1.Borders.BottomWidth = 1;
+            duiTextBox1.Borders.LeftColor = System.Drawing.Color.Empty;
+            duiTextBox1.Borders.LeftWidth = 1;
+            duiTextBox1.Borders.RightColor = System.Drawing.Color.Empty;
+            duiTextBox1.Borders.RightWidth = 1;
+            duiTextBox1.Borders.TopColor = System.Drawing.Color.Empty;
+            duiTextBox1.Borders.TopWidth = 1;
+            duiTextBox1.CanFocus = true;
+            duiTextBox1.CaretColor = System.Drawing.SystemColors.ControlText;
+            duiTextBox1.CaretIndex = 0;
+            duiTextBox1.ClientRectangle = new System.Drawing.Rectangle(0, 0, 100, 12);
+            duiTextBox1.CurrentCursor = System.Windows.Forms.Cursors.Default;
+            duiTextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
+            duiTextBox1.Dock = System.Windows.Forms.DockStyle.None;
+            duiTextBox1.Enabled = true;
+            duiTextBox1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            duiTextBox1.ForeColor = System.Drawing.SystemColors.ControlText;
+            duiTextBox1.Height = 12;
+            duiTextBox1.IsInsert = true;
+            duiTextBox1.IsMoveParentPaint = true;
+            duiTextBox1.Left = 0;
+            duiTextBox1.Location = new System.Drawing.Point(0, 0);
+            duiTextBox1.Margin = new System.Windows.Forms.Padding(0);
+            duiTextBox1.Multiline = false;
+            duiTextBox1.Name = null;
+            duiTextBox1.ParentInvalidate = true;
+            duiTextBox1.ReadOnly = false;
+            duiTextBox1.RollSize = 12;
+            duiTextBox1.ScrollBarBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            duiTextBox1.ScrollBarHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(158)))), ((int)(((byte)(158)))), ((int)(((byte)(158)))));
+            duiTextBox1.ScrollBarNormalColor = System.Drawing.Color.Gray;
+            duiTextBox1.ScrollBarPressColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            duiTextBox1.SelectionBackColor = System.Drawing.Color.Gray;
+            duiTextBox1.SelectionColor = System.Drawing.Color.Red;
+            duiTextBox1.SelectionLength = 0;
+            duiTextBox1.SelectionStart = 0;
+            duiTextBox1.ShowBorder = true;
+            duiTextBox1.ShowScrollBar = true;
+            duiTextBox1.Size = new System.Drawing.Size(100, 12);
+            duiTextBox1.SuspendInvalidate = false;
+            duiTextBox1.Tag = null;
+            duiTextBox1.Text = "";
+            duiTextBox1.TextRenderMode = System.Drawing.Text.TextRenderingHint.SystemDefault;
+            duiTextBox1.Top = 0;
+            duiTextBox1.Visible = true;
+            duiTextBox1.Width = 100;
+            this.lp_panel.DUIControls.AddRange(new LayeredSkin.DirectUI.DuiBaseControl[] {
+            duiTextBox1});
+            this.lp_panel.Location = new System.Drawing.Point(12, 229);
+            this.lp_panel.Name = "lp_panel";
+            this.lp_panel.Size = new System.Drawing.Size(999, 389);
+            this.lp_panel.TabIndex = 13;
+            // 
+            // label_count
+            // 
+            this.label_count.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.label_count.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.label_count.Borders.BottomWidth = 1;
+            this.label_count.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.label_count.Borders.LeftWidth = 1;
+            this.label_count.Borders.RightColor = System.Drawing.Color.Empty;
+            this.label_count.Borders.RightWidth = 1;
+            this.label_count.Borders.TopColor = System.Drawing.Color.Empty;
+            this.label_count.Borders.TopWidth = 1;
+            this.label_count.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("label_count.Canvas")));
+            this.label_count.Font = new System.Drawing.Font("宋体", 12F);
+            this.label_count.ForeColor = System.Drawing.Color.Red;
+            this.label_count.HaloSize = 5;
+            this.label_count.Location = new System.Drawing.Point(303, 35);
+            this.label_count.Name = "label_count";
+            this.label_count.Size = new System.Drawing.Size(374, 25);
+            this.label_count.TabIndex = 14;
+            this.label_count.Text = "当前找到 0 套北京在售房源";
+            this.label_count.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm
             // 
@@ -287,7 +389,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gray;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.ClientSize = new System.Drawing.Size(759, 493);
+            this.ClientSize = new System.Drawing.Size(1023, 710);
+            this.Controls.Add(this.label_count);
+            this.Controls.Add(this.lp_panel);
             this.Controls.Add(this.Panel_xj);
             this.Controls.Add(this.Panel_sc);
             this.Controls.Add(this.Button_subway);
@@ -321,6 +425,8 @@
         private LayeredSkin.Controls.LayeredButton Button_subway;
         private LayeredSkin.Controls.LayeredPanel Panel_sc;
         private LayeredSkin.Controls.LayeredPanel Panel_xj;
+        private LayeredSkin.Controls.LayeredPanel lp_panel;
+        public LayeredSkin.Controls.LayeredLabel label_count;
     }
 }
 
