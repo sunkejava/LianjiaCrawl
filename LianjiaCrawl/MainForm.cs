@@ -296,7 +296,7 @@ namespace LianjiaCrawl
         }
 
         /// <summary>
-        /// 获取房源信息
+        /// 获取房源标题信息
         /// </summary>
         /// <param name="doc"></param>
         private void getAllCrawlText(HtmlAgilityPack.HtmlDocument doc)
@@ -317,7 +317,8 @@ namespace LianjiaCrawl
                     if (item.Attributes["class"].Value != "list_app_daoliu")
                     {
                         var itemstr = item.SelectNodes("a")[0];
-                        string astrs = i.ToString()+"----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value;
+                        string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
+                        string astrs = i.ToString()+"----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value+"----"+ userinfo;
                         duia.Text += astrs + "\r\n";
                         i++;
                     }
@@ -342,6 +343,35 @@ namespace LianjiaCrawl
             }
             label_pagecount.Text = "总页数：" + pcount;
             label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的信息！";
+        }
+        /// <summary>
+        /// 获取房源详细信息
+        /// </summary>
+        /// <param name="url"></param>
+        private string getHouseDetail(string url)
+        {
+            var htmlStr = GetWebClient(url);
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(htmlStr);
+            ///html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]  a  姓名
+            ////html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3] 待处理  电话
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]/div[2]");
+            if (res != null)
+            {
+                var astr = res.SelectNodes("a");
+                foreach (var item in astr)
+                {
+                    var aurl = item.Attributes["href"].Value;
+                    var tags = item.InnerText;
+                    var name = item.InnerText;
+                    Entity.SelectEntity area = new Entity.SelectEntity();
+                    area.Url = "https://bj.lianjia.com" + aurl;
+                    area.Rtag = tags;
+                    area.Name = name;
+                    selectChidens.Add(area);
+                }
+            }
+            return "";
         }
     }
 }
