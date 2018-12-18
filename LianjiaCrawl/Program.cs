@@ -13,7 +13,6 @@ namespace LianjiaCrawl
         [STAThread]
         static void Main()
         {
-            //测试
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
