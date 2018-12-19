@@ -419,7 +419,7 @@ namespace LianjiaCrawl
                 duia.Dock = DockStyle.Fill;
                 duia.Multiline = true;
                 duia.Size = new Size(999, 389);
-                //duia.Text = "";
+                duia.Text = "";
                 //当前页数、总页数
                 var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
                 string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
@@ -610,21 +610,21 @@ namespace LianjiaCrawl
             {
                 string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "UserInfo.txt";
                 String aStr = "";//原来的文本
-                if (File.Exists(uPath))
-                {
-                    //读取原来的文本信息
-                    StreamReader sr = new StreamReader(uPath, Encoding.Default);
-                    String line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        aStr += line;
-                    }
-                    sr.Close();
-                }
-                else
-                {
-                    File.Create(uPath);
-                }
+                //if (File.Exists(uPath))
+                //{
+                //    //读取原来的文本信息
+                //    StreamReader sr = new StreamReader(uPath, true, System.Text.Encoding.Default);
+                //    String line;
+                //    while ((line = sr.ReadLine()) != null)
+                //    {
+                //        aStr += line;
+                //    }
+                //    sr.Close();
+                //}
+                //else
+                //{
+                //    File.Create(uPath);
+                //}
                 DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
                 aStr += duia.Text;
                 //添加新的文本信息
