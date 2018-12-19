@@ -30,14 +30,17 @@ namespace LianjiaCrawl
         public static List<Entity.SelectEntity> areas = new List<Entity.SelectEntity>();//地区集合
         public static List<Entity.SelectEntity> subways = new List<Entity.SelectEntity>();//地铁线路集合
         public static List<Entity.SelectEntity> selectChidens = new List<Entity.SelectEntity>();//末级集合，如：海淀区下的集合 或 一号线的站点
+        public static string nowGetUrl = "";//当前正在获取的地址
+        public static int waitGetPageCount = 100;//待获取页数，默认为100
         public static string findCountHouse = "";
         public static string yjname = "全部";
         public static string ejname = "";
+        public static int nowCrawlCount = 1;
         public delegate void UpdateUI(string type,string value);//声明一个更新控件信息的委托
         public UpdateUI UpdateUIDelegate;
         public delegate void AccomplishTask();//声明一个在完成任务时通知主线程的委托
         public AccomplishTask TaskCallBack;
-        public Thread t = null;
+        //public Thread t = null;
         delegate void AsynUpdateUI(string type, string value);
         #endregion
 
@@ -76,81 +79,102 @@ namespace LianjiaCrawl
 
         private void BaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
-            selectedButtonSkin(sender as DuiButton);
-            selectChidens.Clear();
-            yjname = (sender as DuiButton).Text;
-            string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
-            //根据所选地区或线路获取子信息
-            var htmlStr = GetWebClient(url);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            //子信息
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]/div[2]");
-            if (res != null)
+            try
             {
-                var astr = res.SelectNodes("a");
-                foreach (var item in astr)
+                selectedButtonSkin(sender as DuiButton);
+                selectChidens.Clear();
+                yjname = (sender as DuiButton).Text;
+                string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
+                nowGetUrl = url;
+                //根据所选地区或线路获取子信息
+                var htmlStr = GetWebClient(url);
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(htmlStr);
+                //子信息
+                var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]/div[2]");
+                if (res != null)
                 {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.InnerText;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    area.Url = "https://bj.lianjia.com" + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    selectChidens.Add(area);
+                    var astr = res.SelectNodes("a");
+                    foreach (var item in astr)
+                    {
+                        var aurl = item.Attributes["href"].Value;
+                        var tags = item.InnerText;
+                        var name = item.InnerText;
+                        Entity.SelectEntity area = new Entity.SelectEntity();
+                        area.Url = "https://bj.lianjia.com" + aurl;
+                        area.Rtag = tags;
+                        area.Name = name;
+                        selectChidens.Add(area);
+                    }
+                }
+                else
+                {
+                    //res为null则取地铁信息
+                    var ress = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]/div[2]/@data-d[1]");
+                    string rastr = ress.OuterHtml.Replace("<div class=\"sub_sub_nav sbw_sub_nav\" id=\"sbw_line\" data-d='", "").Replace("' class=\"div_relative\">", "").Replace("</div>", "").Replace(" ", "");
+                    rastr = Unicode2String(rastr);
+                    JObject jo = (JObject)JsonConvert.DeserializeObject(rastr);
+                    foreach (var item in jo)
+                    {
+                        Console.WriteLine(item.Value["name"].ToString() + "---" + item.Value["url"].ToString());
+                        Entity.SelectEntity se = new Entity.SelectEntity();
+                        se.Name = item.Value["name"].ToString();
+                        se.Rtag = item.Value["name"].ToString();
+                        se.Url = "https://bj.lianjia.com" + item.Value["url"].ToString();
+                        selectChidens.Add(se);
+                    }
+                }
+                addSelectChiendControls(selectChidens);
+                Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                docStruct ds = new docStruct();
+                ds.doc = doc;
+                tt.Start(ds);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("原因为"))
+                {
+                    showErrorMessage(ex.Message);
+                }
+                else
+                {
+                    showErrorMessage("获取"+yjname+"的房源信息或下级信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                 }
             }
-            else
-            {
-                //res为null则取地铁信息
-                var ress = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]/div[2]/@data-d[1]");
-                string rastr = ress.OuterHtml.Replace("<div class=\"sub_sub_nav sbw_sub_nav\" id=\"sbw_line\" data-d='", "").Replace("' class=\"div_relative\">", "").Replace("</div>", "").Replace(" ", "");
-                rastr = Unicode2String(rastr);
-                JObject jo = (JObject)JsonConvert.DeserializeObject(rastr);
-                foreach (var item in jo)
-                {
-                    Console.WriteLine(item.Value["name"].ToString() + "---" + item.Value["url"].ToString());
-                    Entity.SelectEntity se = new Entity.SelectEntity();
-                    se.Name = item.Value["name"].ToString();
-                    se.Rtag = item.Value["name"].ToString();
-                    se.Url = item.Value["url"].ToString();
-                    selectChidens.Add(se);
-                }
-            }
-            //当前总共找到XX个房源信息
-            //getAllCrawlText(doc);
-            addSelectChiendControls(selectChidens);
-            if (t != null && t.ThreadState != ThreadState.Stopped && t.ThreadState != ThreadState.Aborted)
-            {
-                t.Abort();
-            }
-            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-            docStruct ds = new docStruct();
-            UpdateUIDelegate += updateLabelText;
-            ds.doc = doc;
-            t.Start(ds);
         }
 
         private void ABaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
-            selectedButtonSkin(sender as DuiButton);
-            ejname = (sender as DuiButton).Text;
-            string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
-            //根据所选地区或线路获取详细信息
-            var htmlStr = GetWebClient(url);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            //getAllCrawlText(doc);
-            if (t != null && t.ThreadState != ThreadState.Stopped && t.ThreadState != ThreadState.Aborted)
+            try
             {
-                t.Abort();
+                selectedButtonSkin(sender as DuiButton);
+                ejname = (sender as DuiButton).Text;
+                string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
+                nowGetUrl = url;
+                //根据所选地区或线路获取详细信息
+                var htmlStr = GetWebClient(url);
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(htmlStr);
+                //getAllCrawlText(doc);
+                Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                docStruct ds = new docStruct();
+                //UpdateUIDelegate += updateLabelText;
+                //TaskCallBack += ThisTaskCallBack;
+                ds.doc = doc;
+                tt.Start(ds);
             }
-            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-            docStruct ds = new docStruct();
-            UpdateUIDelegate += updateLabelText;
-            ds.doc = doc;
-            t.Start(ds);
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("原因为"))
+                {
+                    showErrorMessage(ex.Message);
+                }
+                else
+                {
+                    showErrorMessage("获取" + ejname + "的房源信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                }
+            }
+            
         }
 
         private void Button_subway_Click(object sender, EventArgs e)
@@ -162,6 +186,26 @@ namespace LianjiaCrawl
             addSelectControls(subways);
         }
 
+        private void btn_getAll_Click(object sender, EventArgs e)
+        {
+            //当前地址 nowGetUrl
+            //待获取总页数 waitGetPageCount
+            for (int i = 1; i <= waitGetPageCount; i++)
+            {
+                if (i != 1)
+                {
+                    var htmlStr = GetWebClient(nowGetUrl+"pg"+i.ToString()+"/");
+                    HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.LoadHtml(htmlStr);
+                    Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                    docStruct ds = new docStruct();
+                    //UpdateUIDelegate += updateLabelText;
+                    //TaskCallBack += ThisTaskCallBack;
+                    ds.doc = doc;
+                    tt.Start(ds);
+                }
+            }
+        }
         #endregion
 
         #region 自定义事件
@@ -177,10 +221,9 @@ namespace LianjiaCrawl
                 myStream.Close();
                 return strHTML;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //连接失败
-                return null;
+                throw new Exception("获取网页内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
             }
 
         }
@@ -189,54 +232,64 @@ namespace LianjiaCrawl
         /// </summary>
         public void getAreasAndSubway()
         {
-            var htmlStr = GetWebClient(mainUrl);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            //地区
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]");
-            if (res != null)
+            try
             {
-                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
-                foreach (var item in astr)
+                Bar_kzt.Value = this.Opacity;
+                var htmlStr = GetWebClient(mainUrl);
+                nowGetUrl = mainUrl;
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(htmlStr);
+                //地区
+                var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]");
+                if (res != null)
                 {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.Attributes["title"].Value;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    string lstr = (name == "燕郊" || name == "香河" ? "" : "https://bj.lianjia.com");
-                    area.Url = lstr + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    areas.Add(area);
-                    Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
+                    var astr = res.SelectSingleNode(@"div").SelectNodes("a");
+                    foreach (var item in astr)
+                    {
+                        var aurl = item.Attributes["href"].Value;
+                        var tags = item.Attributes["title"].Value;
+                        var name = item.InnerText;
+                        Entity.SelectEntity area = new Entity.SelectEntity();
+                        string lstr = (name == "燕郊" || name == "香河" ? "" : "https://bj.lianjia.com");
+                        area.Url = lstr + aurl;
+                        area.Rtag = tags;
+                        area.Name = name;
+                        areas.Add(area);
+                        Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
+                    }
                 }
+                //地铁线
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]");
+                if (res != null)
+                {
+                    var astr = res.SelectSingleNode(@"div").SelectNodes("a");
+                    foreach (var item in astr)
+                    {
+                        var aurl = item.Attributes["href"].Value;
+                        var tags = item.Attributes["title"].Value;
+                        var name = item.InnerText;
+                        Entity.SelectEntity area = new Entity.SelectEntity();
+                        area.Url = "https://bj.lianjia.com" + aurl;
+                        area.Rtag = tags;
+                        area.Name = name;
+                        subways.Add(area);
+                        Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
+                    }
+                }
+                //当前总共找到XX个房源信息
+                Thread t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                docStruct ds = new docStruct();
+                UpdateUIDelegate += updateLabelText;
+                TaskCallBack += ThisTaskCallBack;
+                ds.doc = doc;
+                t.Start(ds);
+                //getAllCrawlText(doc);
             }
-            //地铁线
-            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]");
-            if (res != null)
+            catch (Exception ex)
             {
-                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
-                foreach (var item in astr)
-                {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.Attributes["title"].Value;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    area.Url = "https://bj.lianjia.com" + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    subways.Add(area);
-                    Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
-                }
+                showErrorMessage("获取地区或地铁线路时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
             }
-            //当前总共找到XX个房源信息
-            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-            docStruct ds = new docStruct();
-            ds.doc = doc;
-            UpdateUIDelegate += updateLabelText;
-            TaskCallBack += ThisTaskCallBack;
-            t.Start(ds);
-            //getAllCrawlText(doc);
+            
         }
         struct docStruct{
             public HtmlAgilityPack.HtmlDocument doc;
@@ -245,14 +298,14 @@ namespace LianjiaCrawl
         {
             if (db.Name.Contains("yjbaseButton"))
             {
-                foreach (DuiBaseControl itemDb in Panel_sc.DUIControls)
+                foreach (DuiButton itemDb in Panel_sc.DUIControls[0].Controls)
                 {
                     itemDb.BackColor = Color.Transparent;
                 }
             }
             else
             {
-                foreach (DuiBaseControl itemDb in Panel_xj.DUIControls)
+                foreach (DuiButton itemDb in Panel_xj.DUIControls[0].Controls)
                 {
                     itemDb.BackColor = Color.Transparent;
                 }
@@ -289,6 +342,7 @@ namespace LianjiaCrawl
                 baseButton.Size = new Size(60, 20);
                 baseButton.BackColor = Color.Transparent;
                 baseButton.BaseColor = Color.Transparent;
+                baseButton.Cursor = Cursors.Hand;
                 if (i * 2 + 60 * (i) > this.Width)
                 {
                     row++;
@@ -329,6 +383,7 @@ namespace LianjiaCrawl
                 baseButton.Size = new Size(60, 20);
                 baseButton.BackColor = Color.Transparent;
                 baseButton.BaseColor = Color.Transparent;
+                baseButton.Cursor = Cursors.Hand;
                 if (i * 2 + 60 * (i) > this.Width)
                 {
                     row++;
@@ -356,71 +411,95 @@ namespace LianjiaCrawl
         /// <param name="doc"></param>
         private void getAllCrawlText(Object ob)
         {
-            docStruct ds = (docStruct)ob;
-            HtmlAgilityPack.HtmlDocument doc = ds.doc; 
-            DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
-            duia.Dock = DockStyle.Fill;
-            duia.Multiline = true;
-            duia.Size = new Size(999, 389);
-            duia.Text = "";
-            //当前页数、总页数
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
-            string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
-            JObject jo = (JObject)JsonConvert.DeserializeObject(str);
-            string pcount = "";
-            string npage = "";
-            foreach (var item in jo)
+            try
             {
-                if (item.Key.Contains("totalPage"))
+                docStruct ds = (docStruct)ob;
+                HtmlAgilityPack.HtmlDocument doc = ds.doc;
+                DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+                duia.Dock = DockStyle.Fill;
+                duia.Multiline = true;
+                duia.Size = new Size(999, 389);
+                //duia.Text = "";
+                //当前页数、总页数
+                var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
+                string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
+                JObject jo = (JObject)JsonConvert.DeserializeObject(str);
+                string pcount = "";
+                string npage = "";
+                foreach (var item in jo)
                 {
-                    pcount = item.Value.ToString();
+                    if (item.Key.Contains("totalPage"))
+                    {
+                        pcount = item.Value.ToString();
+                        waitGetPageCount = int.Parse(pcount);
+                    }
+                    else
+                    {
+                        npage = item.Value.ToString();
+                    }
+                }
+                UpdateUIDelegate("label_pagecount", "总页数：" + pcount);
+                //label_pagecount.Text = "总页数：" + pcount;
+                UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！");
+                //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！";
+                //当前总共找到XX个房源信息
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
+                if (res != null)
+                {
+                    var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
+                    foreach (var item in astr)
+                    {
+                        var count = item.InnerText;
+                        findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
+                    }
+                }
+                UpdateUIDelegate("label_count", findCountHouse);
+                //this.label_count.Text = findCountHouse;
+                //获取所有房源信息
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
+                if (res != null)
+                {
+                    var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
+                    int i = 1;
+                    foreach (var item in astr)
+                    {
+                        if (item.Attributes["class"].Value != "list_app_daoliu")
+                        {
+                            
+                            if (item.SelectNodes("a").Count>0)
+                            {
+                                var itemstr = item.SelectNodes("a")[0];
+                                UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页第" + i.ToString() + "条的房源销售信息！");
+                                //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页第"+i.ToString()+"条的房源销售信息！";
+                                string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
+                                if (itemstr.SelectNodes("img").Count > 0 )
+                                {
+                                    string tname = (itemstr.SelectNodes("img").Count == 1 ? itemstr.SelectNodes("img")[0].Attributes["alt"].Value : itemstr.SelectNodes("img")[1].Attributes["alt"].Value);
+                                    string astrs = nowCrawlCount.ToString() + "----" + itemstr.Attributes["href"].Value + "----" + tname + "----" + userinfo;
+                                    UpdateUIDelegate("duia", astrs + "\r\n");
+                                    nowCrawlCount++;
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                }
+                UpdateUIDelegate("label_nowcrawlpage", yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！");
+                //label_nowcrawlpage.Text = yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！";
+                TaskCallBack();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("原因为"))
+                {
+                    showErrorMessage(ex.Message);
                 }
                 else
                 {
-                    npage = item.Value.ToString();
+                    showErrorMessage("获取房源信息出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                 }
             }
-            UpdateUIDelegate("label_pagecount", "总页数：" + pcount);
-            //label_pagecount.Text = "总页数：" + pcount;
-            UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！");
-            //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！";
-            //当前总共找到XX个房源信息
-            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
-            if (res != null)
-            {
-                var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
-                foreach (var item in astr)
-                {
-                    var count = item.InnerText;
-                    findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
-                }
-            }
-            UpdateUIDelegate("label_count", findCountHouse);
-            //this.label_count.Text = findCountHouse;
-            //获取所有房源信息
-            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
-            if (res != null)
-            {
-                var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
-                int i = 1;
-                foreach (var item in astr)
-                {
-                    if (item.Attributes["class"].Value != "list_app_daoliu")
-                    {
-                        var itemstr = item.SelectNodes("a")[0];
-                        UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页第" + i.ToString() + "条的房源销售信息！");
-                        //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页第"+i.ToString()+"条的房源销售信息！";
-                        string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
-                        string astrs = i.ToString() + "----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value + "----" + userinfo;
-                        UpdateUIDelegate("duia", astrs + "\r\n");
-                        //duia.Text += astrs + "\r\n";
-                        i++;
-                    }
-                }
-            }
-            UpdateUIDelegate("label_nowcrawlpage", yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！");
-            //label_nowcrawlpage.Text = yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！";
-            TaskCallBack();
+            
         }
         /// <summary>
         /// 获取房源详细信息
@@ -428,29 +507,35 @@ namespace LianjiaCrawl
         /// <param name="url"></param>
         private string getHouseDetail(string url)
         {
-            var htmlStr = GetWebClient(url);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            ///html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]  a  姓名
-            ////html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3] 待处理  电话
-            //获取姓名
-            string userInfo = "";
-            var res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]");
-            if (res != null)
+            try
             {
-                var astr = res.SelectNodes("a");
-                foreach (var item in astr)
+                var htmlStr = GetWebClient(url);
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(htmlStr);
+                //获取姓名
+                string userInfo = "";
+                var res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]");
+                if (res != null)
                 {
-                    userInfo = item.InnerText;
+                    var astr = res.SelectNodes("a");
+                    foreach (var item in astr)
+                    {
+                        userInfo = item.InnerText;
+                    }
                 }
+                //获取电话
+                res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3]");
+                if (res != null)
+                {
+                    userInfo = userInfo + "----" + res.InnerText.Replace("微信扫码拨号", "");
+                }
+                return userInfo;
             }
-            //获取电话
-            res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3]");
-            if (res != null)
+            catch (Exception ex)
             {
-                userInfo = userInfo+"----"+ res.InnerText.Replace("微信扫码拨号","");
+                throw new Exception("获取销售信息出错，原因为："+ex.Message+ex.StackTrace.ToString());
             }
-            return userInfo;
+            
         }
         /// <summary>
         /// 更新控件信息
@@ -459,20 +544,44 @@ namespace LianjiaCrawl
         /// <param name="value"></param>
         private void updateLabelText(string type,string value)
         {
-            if (InvokeRequired)
+            try
             {
-                this.Invoke(new AsynUpdateUI(delegate (string atype,string avalue)
+                if (InvokeRequired)
                 {
-                    switch (atype)
+                    this.Invoke(new AsynUpdateUI(delegate (string atype, string avalue)
+                    {
+                        switch (atype)
+                        {
+                            case "label_pagecount":
+                                label_pagecount.Text = avalue;
+                                break;
+                            case "label_nowcrawlpage":
+                                label_nowcrawlpage.Text = avalue;
+                                break;
+                            case "label_count":
+                                label_count.Text = avalue;
+                                break;
+                            case "duia":
+                                DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+                                duia.Text = duia.Text + value;
+                                break;
+                            default:
+                                break;
+                        }
+                    }), type, value);
+                }
+                else
+                {
+                    switch (type)
                     {
                         case "label_pagecount":
-                            label_pagecount.Text = avalue;
+                            label_pagecount.Text = value;
                             break;
                         case "label_nowcrawlpage":
-                            label_nowcrawlpage.Text = avalue;
+                            label_nowcrawlpage.Text = value;
                             break;
                         case "label_count":
-                            label_count.Text = avalue;
+                            label_count.Text = value;
                             break;
                         case "duia":
                             DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
@@ -481,30 +590,12 @@ namespace LianjiaCrawl
                         default:
                             break;
                     }
-                }), type,value);
-            }
-            else
-            {
-                switch (type)
-                {
-                    case "label_pagecount":
-                        label_pagecount.Text = value;
-                        break;
-                    case "label_nowcrawlpage":
-                        label_nowcrawlpage.Text = value;
-                        break;
-                    case "label_count":
-                        label_count.Text = value;
-                        break;
-                    case "duia":
-                        DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
-                        duia.Text = duia.Text + value;
-                        break;
-                    default:
-                        break;
                 }
             }
-            
+            catch (Exception ex)
+            {
+                showErrorMessage("更新控件信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+            }
         }
         /// <summary>
         /// 线程执行完毕后的事件
@@ -514,6 +605,47 @@ namespace LianjiaCrawl
         {
             //t.Abort();
             Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+"线程执行完毕！");
+            //开始写出文本
+            try
+            {
+                string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "UserInfo.txt";
+                String aStr = "";//原来的文本
+                if (File.Exists(uPath))
+                {
+                    //读取原来的文本信息
+                    StreamReader sr = new StreamReader(uPath, Encoding.Default);
+                    String line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        aStr += line;
+                    }
+                    sr.Close();
+                }
+                else
+                {
+                    File.Create(uPath);
+                }
+                DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+                aStr += duia.Text;
+                //添加新的文本信息
+                StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
+                //开始写入
+                sw.Write(aStr);
+                //清空缓冲区
+                sw.Flush();
+                //关闭流
+                sw.Close();
+            }
+            catch (Exception e)
+            {
+                showErrorMessage("写出信息失败，原因为："+e.Message+e.StackTrace.ToString());
+            }
+        }
+
+        private void showErrorMessage(string errStr)
+        {
+            MessageForm errFrom = new MessageForm(errStr);
+            errFrom.ShowDialog();
         }
         #endregion
     }
