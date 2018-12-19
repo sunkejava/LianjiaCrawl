@@ -430,7 +430,7 @@
             // 
             // MainForm
             // 
-            this.AnimationType = LayeredSkin.Forms.AnimationTypes.GradualCurtainEffect;
+            this.AnimationType = LayeredSkin.Forms.AnimationTypes.Custom;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gray;
@@ -449,6 +449,7 @@
             this.Controls.Add(this.Bar_kzt);
             this.Controls.Add(this.layeredButton_close);
             this.Controls.Add(this.layeredButton_mini);
+            this.EnableAnimation = false;
             this.HaloColor = System.Drawing.Color.Gray;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;

@@ -15,6 +15,7 @@ using System.Web.Script.Serialization;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace LianjiaCrawl
 {
@@ -32,6 +33,12 @@ namespace LianjiaCrawl
         public static string findCountHouse = "";
         public static string yjname = "全部";
         public static string ejname = "";
+        public delegate void UpdateUI(string type,string value);//声明一个更新控件信息的委托
+        public UpdateUI UpdateUIDelegate;
+        public delegate void AccomplishTask();//声明一个在完成任务时通知主线程的委托
+        public AccomplishTask TaskCallBack;
+        public Thread t = null;
+        delegate void AsynUpdateUI(string type, string value);
         #endregion
 
 
@@ -43,8 +50,6 @@ namespace LianjiaCrawl
 
         private void layeredButton_close_Click(object sender, EventArgs e)
         {
-            this.Animation.Effect = new LayeredSkin.Animations.GradualCurtainEffect();
-            this.Animation.Asc = true;
             this.Close();
         }
 
@@ -55,12 +60,15 @@ namespace LianjiaCrawl
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            getAreasAndSubway();
+            Thread at = new Thread(new ThreadStart(getAreasAndSubway));
+            at.Start();
+            //getAreasAndSubway();
         }
 
         private void Button_area_Click(object sender, EventArgs e)
         {
-            //yjname =(sender as DuiButton).Text;
+            Button_area.BackColor = Color.FromArgb(174, 102, 1);
+            Button_subway.BackColor = Color.Transparent;
             Panel_sc.DUIControls.Clear();
             Panel_xj.DUIControls.Clear();
             addSelectControls(areas);
@@ -68,9 +76,10 @@ namespace LianjiaCrawl
 
         private void BaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
+            selectedButtonSkin(sender as DuiButton);
             selectChidens.Clear();
             yjname = (sender as DuiButton).Text;
-            string url = (sender as DuiButton).Name.Replace("baseButton_", "");
+            string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
             //根据所选地区或线路获取子信息
             var htmlStr = GetWebClient(url);
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -110,26 +119,44 @@ namespace LianjiaCrawl
                 }
             }
             //当前总共找到XX个房源信息
-            getFindallHous(doc);
-            getAllCrawlText(doc);
+            //getAllCrawlText(doc);
             addSelectChiendControls(selectChidens);
+            if (t != null && t.ThreadState != ThreadState.Stopped && t.ThreadState != ThreadState.Aborted)
+            {
+                t.Abort();
+            }
+            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+            docStruct ds = new docStruct();
+            UpdateUIDelegate += updateLabelText;
+            ds.doc = doc;
+            t.Start(ds);
         }
 
         private void ABaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
+            selectedButtonSkin(sender as DuiButton);
             ejname = (sender as DuiButton).Text;
-            string url = (sender as DuiButton).Name.Replace("baseButton_", "");
+            string url = (sender as DuiButton).Name.Replace("yjbaseButton_", "").Replace("ejbaseButton_", "");
             //根据所选地区或线路获取详细信息
             var htmlStr = GetWebClient(url);
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(htmlStr);
-            getFindallHous(doc);
-            getAllCrawlText(doc);
+            //getAllCrawlText(doc);
+            if (t != null && t.ThreadState != ThreadState.Stopped && t.ThreadState != ThreadState.Aborted)
+            {
+                t.Abort();
+            }
+            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+            docStruct ds = new docStruct();
+            UpdateUIDelegate += updateLabelText;
+            ds.doc = doc;
+            t.Start(ds);
         }
 
         private void Button_subway_Click(object sender, EventArgs e)
         {
-            //yjname = (sender as DuiButton).Text;
+            Button_subway.BackColor = Color.FromArgb(174, 102, 1);
+            Button_area.BackColor = Color.Transparent;
             Panel_sc.DUIControls.Clear();
             Panel_xj.DUIControls.Clear();
             addSelectControls(subways);
@@ -203,24 +230,34 @@ namespace LianjiaCrawl
                 }
             }
             //当前总共找到XX个房源信息
-            getFindallHous(doc);
-            getAllCrawlText(doc);
+            t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+            docStruct ds = new docStruct();
+            ds.doc = doc;
+            UpdateUIDelegate += updateLabelText;
+            TaskCallBack += ThisTaskCallBack;
+            t.Start(ds);
+            //getAllCrawlText(doc);
         }
-
-        private void getFindallHous(HtmlAgilityPack.HtmlDocument doc)
+        struct docStruct{
+            public HtmlAgilityPack.HtmlDocument doc;
+        }
+        private void selectedButtonSkin(DuiButton db)
         {
-            //当前总共找到XX个房源信息
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
-            if (res != null)
+            if (db.Name.Contains("yjbaseButton"))
             {
-                var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
-                foreach (var item in astr)
+                foreach (DuiBaseControl itemDb in Panel_sc.DUIControls)
                 {
-                    var count = item.InnerText;
-                    findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
+                    itemDb.BackColor = Color.Transparent;
                 }
             }
-            this.label_count.Text = findCountHouse;
+            else
+            {
+                foreach (DuiBaseControl itemDb in Panel_xj.DUIControls)
+                {
+                    itemDb.BackColor = Color.Transparent;
+                }
+            }
+            db.BackColor = Color.FromArgb(174,102,1);
         }
         /// <summary>
         /// Unicode转字符串
@@ -232,7 +269,10 @@ namespace LianjiaCrawl
             return new Regex(@"\\u([0-9A-F]{4})", RegexOptions.IgnoreCase | RegexOptions.Compiled).Replace(
                 source, x => string.Empty + Convert.ToChar(Convert.ToUInt16(x.Result("$1"), 16)));
         }
-
+        /// <summary>
+        /// 添加一级菜单按钮
+        /// </summary>
+        /// <param name="lists"></param>
         private void addSelectControls(List<Entity.SelectEntity> lists)
         {
             Panel_sc.DUIControls.Clear();
@@ -262,14 +302,17 @@ namespace LianjiaCrawl
                     i++;
                 }
                 baseButton.Tag = item.Rtag;
-                baseButton.Name = "baseButton_" + item.Url;
+                baseButton.Name = "yjbaseButton_" + item.Url;
                 baseButton.MouseClick += BaseButton_MouseClick;
                 i++;
                 baseControl.Controls.Add(baseButton);
             }
             Panel_sc.DUIControls.Add(baseControl);
         }
-
+        /// <summary>
+        /// 添加二级菜单按钮
+        /// </summary>
+        /// <param name="sLists"></param>
         private void addSelectChiendControls(List<Entity.SelectEntity> sLists)
         {
             Panel_xj.DUIControls.Clear();
@@ -299,7 +342,7 @@ namespace LianjiaCrawl
                     i++;
                 }
                 baseButton.Tag = item.Rtag;
-                baseButton.Name = "baseButton_" + item.Url;
+                baseButton.Name = "ejbaseButton_" + item.Url;
                 baseButton.MouseClick += ABaseButton_MouseClick;
                 i++;
                 baseControl.Controls.Add(baseButton);
@@ -311,33 +354,17 @@ namespace LianjiaCrawl
         /// 获取房源标题信息
         /// </summary>
         /// <param name="doc"></param>
-        private void getAllCrawlText(HtmlAgilityPack.HtmlDocument doc)
+        private void getAllCrawlText(Object ob)
         {
+            docStruct ds = (docStruct)ob;
+            HtmlAgilityPack.HtmlDocument doc = ds.doc; 
             DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
             duia.Dock = DockStyle.Fill;
             duia.Multiline = true;
             duia.Size = new Size(999, 389);
             duia.Text = "";
-            //当前总共找到XX个房源信息
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
-            if (res != null)
-            {
-                var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
-                int i = 1;
-                foreach (var item in astr)
-                {
-                    if (item.Attributes["class"].Value != "list_app_daoliu")
-                    {
-                        var itemstr = item.SelectNodes("a")[0];
-                        string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
-                        string astrs = i.ToString() + "----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value + "----" + userinfo;
-                        duia.Text += astrs + "\r\n";
-                        i++;
-                    }
-                }
-            }
             //当前页数、总页数
-            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
             string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
             JObject jo = (JObject)JsonConvert.DeserializeObject(str);
             string pcount = "";
@@ -353,8 +380,47 @@ namespace LianjiaCrawl
                     npage = item.Value.ToString();
                 }
             }
-            label_pagecount.Text = "总页数：" + pcount;
-            label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的信息！";
+            UpdateUIDelegate("label_pagecount", "总页数：" + pcount);
+            //label_pagecount.Text = "总页数：" + pcount;
+            UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！");
+            //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！";
+            //当前总共找到XX个房源信息
+            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
+                foreach (var item in astr)
+                {
+                    var count = item.InnerText;
+                    findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
+                }
+            }
+            UpdateUIDelegate("label_count", findCountHouse);
+            //this.label_count.Text = findCountHouse;
+            //获取所有房源信息
+            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
+                int i = 1;
+                foreach (var item in astr)
+                {
+                    if (item.Attributes["class"].Value != "list_app_daoliu")
+                    {
+                        var itemstr = item.SelectNodes("a")[0];
+                        UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页第" + i.ToString() + "条的房源销售信息！");
+                        //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页第"+i.ToString()+"条的房源销售信息！";
+                        string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
+                        string astrs = i.ToString() + "----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value + "----" + userinfo;
+                        UpdateUIDelegate("duia", astrs + "\r\n");
+                        //duia.Text += astrs + "\r\n";
+                        i++;
+                    }
+                }
+            }
+            UpdateUIDelegate("label_nowcrawlpage", yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！");
+            //label_nowcrawlpage.Text = yjname + ejname + "第 " + npage + " 页的房源信息采集完毕！";
+            TaskCallBack();
         }
         /// <summary>
         /// 获取房源详细信息
@@ -386,11 +452,69 @@ namespace LianjiaCrawl
             }
             return userInfo;
         }
+        /// <summary>
+        /// 更新控件信息
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        private void updateLabelText(string type,string value)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new AsynUpdateUI(delegate (string atype,string avalue)
+                {
+                    switch (atype)
+                    {
+                        case "label_pagecount":
+                            label_pagecount.Text = avalue;
+                            break;
+                        case "label_nowcrawlpage":
+                            label_nowcrawlpage.Text = avalue;
+                            break;
+                        case "label_count":
+                            label_count.Text = avalue;
+                            break;
+                        case "duia":
+                            DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+                            duia.Text = duia.Text + value;
+                            break;
+                        default:
+                            break;
+                    }
+                }), type,value);
+            }
+            else
+            {
+                switch (type)
+                {
+                    case "label_pagecount":
+                        label_pagecount.Text = value;
+                        break;
+                    case "label_nowcrawlpage":
+                        label_nowcrawlpage.Text = value;
+                        break;
+                    case "label_count":
+                        label_count.Text = value;
+                        break;
+                    case "duia":
+                        DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+                        duia.Text = duia.Text + value;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            
+        }
+        /// <summary>
+        /// 线程执行完毕后的事件
+        /// </summary>
+        /// <param name="t"></param>
+        private void ThisTaskCallBack()
+        {
+            //t.Abort();
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+"线程执行完毕！");
+        }
         #endregion
-
-
-
-
-
     }
 }
