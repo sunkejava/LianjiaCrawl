@@ -24,13 +24,18 @@ namespace LianjiaCrawl
         {
             InitializeComponent();
         }
-        public static string mainUrl = "https://bj.lianjia.com/ershoufang/";
-        public static List<Entity.SelectEntity> areas = new List<Entity.SelectEntity>();
-        public static List<Entity.SelectEntity> subways = new List<Entity.SelectEntity>();
-        public static List<Entity.SelectEntity> selectChidens = new List<Entity.SelectEntity>();
+        #region 公共变量
+        public static string mainUrl = "https://bj.lianjia.com/ershoufang/";//默认首页地址
+        public static List<Entity.SelectEntity> areas = new List<Entity.SelectEntity>();//地区集合
+        public static List<Entity.SelectEntity> subways = new List<Entity.SelectEntity>();//地铁线路集合
+        public static List<Entity.SelectEntity> selectChidens = new List<Entity.SelectEntity>();//末级集合，如：海淀区下的集合 或 一号线的站点
         public static string findCountHouse = "";
         public static string yjname = "全部";
         public static string ejname = "";
+        #endregion
+
+
+        #region 控件事件
         private void layeredButton_mini_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -52,74 +57,6 @@ namespace LianjiaCrawl
         {
             getAreasAndSubway();
         }
-        public string GetWebClient(string url)
-        {
-            try
-            {
-                string strHTML = "";
-                WebClient myWebClient = new WebClient();
-                Stream myStream = myWebClient.OpenRead(url);
-                StreamReader sr = new StreamReader(myStream, Encoding.UTF8);//注意编码
-                strHTML = sr.ReadToEnd();
-                myStream.Close();
-                return strHTML;
-            }
-            catch (Exception)
-            {
-                //连接失败
-                return null;
-            }
-            
-        }
-        /// <summary>
-        /// 获取地区及地铁信息
-        /// </summary>
-        public void getAreasAndSubway()
-        {
-            var htmlStr = GetWebClient(mainUrl);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            //地区
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]");
-            if (res != null)
-            {
-                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
-                foreach (var item in astr)
-                {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.Attributes["title"].Value;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    string lstr = (name == "燕郊" || name == "香河" ? "" : "https://bj.lianjia.com");
-                    area.Url = lstr + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    areas.Add(area);
-                    Console.WriteLine("name:"+name+"---tags:"+tags+"---url:"+aurl);
-                }
-            }
-            //地铁线
-            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]");
-            if (res != null)
-            {
-                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
-                foreach (var item in astr)
-                {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.Attributes["title"].Value;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    area.Url = "https://bj.lianjia.com" + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    subways.Add(area);
-                    Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
-                }
-            }
-            //当前总共找到XX个房源信息
-            getFindallHous(doc);
-            getAllCrawlText(doc);
-        }
 
         private void Button_area_Click(object sender, EventArgs e)
         {
@@ -132,7 +69,7 @@ namespace LianjiaCrawl
         private void BaseButton_MouseClick(object sender, DuiMouseEventArgs e)
         {
             selectChidens.Clear();
-            ejname = (sender as DuiButton).Text;
+            yjname = (sender as DuiButton).Text;
             string url = (sender as DuiButton).Name.Replace("baseButton_", "");
             //根据所选地区或线路获取子信息
             var htmlStr = GetWebClient(url);
@@ -159,12 +96,12 @@ namespace LianjiaCrawl
             {
                 //res为null则取地铁信息
                 var ress = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]/div[2]/@data-d[1]");
-                string rastr = ress.OuterHtml.Replace("<div class=\"sub_sub_nav sbw_sub_nav\" id=\"sbw_line\" data-d='", "").Replace("' class=\"div_relative\">", "").Replace("</div>", "").Replace(" ","");
+                string rastr = ress.OuterHtml.Replace("<div class=\"sub_sub_nav sbw_sub_nav\" id=\"sbw_line\" data-d='", "").Replace("' class=\"div_relative\">", "").Replace("</div>", "").Replace(" ", "");
                 rastr = Unicode2String(rastr);
                 JObject jo = (JObject)JsonConvert.DeserializeObject(rastr);
                 foreach (var item in jo)
                 {
-                    Console.WriteLine(item.Value["name"].ToString()+"---"+item.Value["url"].ToString());
+                    Console.WriteLine(item.Value["name"].ToString() + "---" + item.Value["url"].ToString());
                     Entity.SelectEntity se = new Entity.SelectEntity();
                     se.Name = item.Value["name"].ToString();
                     se.Rtag = item.Value["name"].ToString();
@@ -177,6 +114,99 @@ namespace LianjiaCrawl
             getAllCrawlText(doc);
             addSelectChiendControls(selectChidens);
         }
+
+        private void ABaseButton_MouseClick(object sender, DuiMouseEventArgs e)
+        {
+            ejname = (sender as DuiButton).Text;
+            string url = (sender as DuiButton).Name.Replace("baseButton_", "");
+            //根据所选地区或线路获取详细信息
+            var htmlStr = GetWebClient(url);
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(htmlStr);
+            getFindallHous(doc);
+            getAllCrawlText(doc);
+        }
+
+        private void Button_subway_Click(object sender, EventArgs e)
+        {
+            //yjname = (sender as DuiButton).Text;
+            Panel_sc.DUIControls.Clear();
+            Panel_xj.DUIControls.Clear();
+            addSelectControls(subways);
+        }
+
+        #endregion
+
+        #region 自定义事件
+        public string GetWebClient(string url)
+        {
+            try
+            {
+                string strHTML = "";
+                WebClient myWebClient = new WebClient();
+                Stream myStream = myWebClient.OpenRead(url);
+                StreamReader sr = new StreamReader(myStream, Encoding.UTF8);//注意编码
+                strHTML = sr.ReadToEnd();
+                myStream.Close();
+                return strHTML;
+            }
+            catch (Exception)
+            {
+                //连接失败
+                return null;
+            }
+
+        }
+        /// <summary>
+        /// 获取地区及地铁信息
+        /// </summary>
+        public void getAreasAndSubway()
+        {
+            var htmlStr = GetWebClient(mainUrl);
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(htmlStr);
+            //地区
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
+                foreach (var item in astr)
+                {
+                    var aurl = item.Attributes["href"].Value;
+                    var tags = item.Attributes["title"].Value;
+                    var name = item.InnerText;
+                    Entity.SelectEntity area = new Entity.SelectEntity();
+                    string lstr = (name == "燕郊" || name == "香河" ? "" : "https://bj.lianjia.com");
+                    area.Url = lstr + aurl;
+                    area.Rtag = tags;
+                    area.Name = name;
+                    areas.Add(area);
+                    Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
+                }
+            }
+            //地铁线
+            res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[2]");
+            if (res != null)
+            {
+                var astr = res.SelectSingleNode(@"div").SelectNodes("a");
+                foreach (var item in astr)
+                {
+                    var aurl = item.Attributes["href"].Value;
+                    var tags = item.Attributes["title"].Value;
+                    var name = item.InnerText;
+                    Entity.SelectEntity area = new Entity.SelectEntity();
+                    area.Url = "https://bj.lianjia.com" + aurl;
+                    area.Rtag = tags;
+                    area.Name = name;
+                    subways.Add(area);
+                    Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
+                }
+            }
+            //当前总共找到XX个房源信息
+            getFindallHous(doc);
+            getAllCrawlText(doc);
+        }
+
         private void getFindallHous(HtmlAgilityPack.HtmlDocument doc)
         {
             //当前总共找到XX个房源信息
@@ -201,24 +231,6 @@ namespace LianjiaCrawl
         {
             return new Regex(@"\\u([0-9A-F]{4})", RegexOptions.IgnoreCase | RegexOptions.Compiled).Replace(
                 source, x => string.Empty + Convert.ToChar(Convert.ToUInt16(x.Result("$1"), 16)));
-        }
-        private void ABaseButton_MouseClick(object sender, DuiMouseEventArgs e)
-        {
-            string url = (sender as DuiButton).Name.Replace("baseButton_", "");
-            //根据所选地区或线路获取详细信息
-            var htmlStr = GetWebClient(url);
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(htmlStr);
-            getFindallHous(doc);
-            getAllCrawlText(doc);
-        }
-
-        private void Button_subway_Click(object sender, EventArgs e)
-        {
-            //yjname = (sender as DuiButton).Text;
-            Panel_sc.DUIControls.Clear();
-            Panel_xj.DUIControls.Clear();
-            addSelectControls(subways);
         }
 
         private void addSelectControls(List<Entity.SelectEntity> lists)
@@ -304,7 +316,7 @@ namespace LianjiaCrawl
             DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
             duia.Dock = DockStyle.Fill;
             duia.Multiline = true;
-            duia.Size = new Size(999,389);
+            duia.Size = new Size(999, 389);
             duia.Text = "";
             //当前总共找到XX个房源信息
             var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
@@ -318,7 +330,7 @@ namespace LianjiaCrawl
                     {
                         var itemstr = item.SelectNodes("a")[0];
                         string userinfo = getHouseDetail(itemstr.Attributes["href"].Value);
-                        string astrs = i.ToString()+"----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value+"----"+ userinfo;
+                        string astrs = i.ToString() + "----" + itemstr.Attributes["href"].Value + "----" + itemstr.SelectNodes("img")[1].Attributes["alt"].Value + "----" + userinfo;
                         duia.Text += astrs + "\r\n";
                         i++;
                     }
@@ -355,23 +367,30 @@ namespace LianjiaCrawl
             doc.LoadHtml(htmlStr);
             ///html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]  a  姓名
             ////html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3] 待处理  电话
-            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[3]/div[1]/div[1]/dl[2]/dd[1]/div[1]/div[2]");
+            //获取姓名
+            string userInfo = "";
+            var res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[1]");
             if (res != null)
             {
                 var astr = res.SelectNodes("a");
                 foreach (var item in astr)
                 {
-                    var aurl = item.Attributes["href"].Value;
-                    var tags = item.InnerText;
-                    var name = item.InnerText;
-                    Entity.SelectEntity area = new Entity.SelectEntity();
-                    area.Url = "https://bj.lianjia.com" + aurl;
-                    area.Rtag = tags;
-                    area.Name = name;
-                    selectChidens.Add(area);
+                    userInfo = item.InnerText;
                 }
             }
-            return "";
+            //获取电话
+            res = doc.DocumentNode.SelectSingleNode(@"html[1]/body[1]/div[5]/div[2]/div[5]/div[1]/div[3]");
+            if (res != null)
+            {
+                userInfo = userInfo+"----"+ res.InnerText.Replace("微信扫码拨号","");
+            }
+            return userInfo;
         }
+        #endregion
+
+
+
+
+
     }
 }
