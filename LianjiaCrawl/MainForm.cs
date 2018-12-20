@@ -35,12 +35,14 @@ namespace LianjiaCrawl
         public static string findCountHouse = "";
         public static string yjname = "全部";
         public static string ejname = "";
+        public static bool threadIsEnd = false;
         public static int nowCrawlCount = 1;
         public delegate void UpdateUI(string type,string value);//声明一个更新控件信息的委托
         public UpdateUI UpdateUIDelegate;
         public delegate void AccomplishTask();//声明一个在完成任务时通知主线程的委托
         public AccomplishTask TaskCallBack;
-        //public Thread t = null;
+        public Thread t = null;
+        public PropertsUtils perUtils = new PropertsUtils();
         delegate void AsynUpdateUI(string type, string value);
         #endregion
 
@@ -56,13 +58,15 @@ namespace LianjiaCrawl
             this.Close();
         }
 
-        private void layeredTrackBar1_ValueChanged(object sender, EventArgs e)
-        {
-            this.Opacity = Bar_kzt.Value;
-        }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.Radius = int.Parse(perUtils.Radius);
+            this.Opacity = int.Parse(perUtils.Opacity);
+            if (perUtils.BackImg != "")
+            {
+                this.BackgroundImage = Image.FromFile(perUtils.BackImg);
+            }
             Thread at = new Thread(new ThreadStart(getAreasAndSubway));
             at.Start();
             //getAreasAndSubway();
@@ -125,10 +129,14 @@ namespace LianjiaCrawl
                     }
                 }
                 addSelectChiendControls(selectChidens);
-                Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                docStruct ds = new docStruct();
-                ds.doc = doc;
-                tt.Start(ds);
+                if (threadIsEnd)
+                {
+                    t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                    docStruct ds = new docStruct();
+                    ds.doc = doc;
+                    threadIsEnd = false;
+                    t.Start(ds);
+                }
             }
             catch (Exception ex)
             {
@@ -155,13 +163,14 @@ namespace LianjiaCrawl
                 var htmlStr = GetWebClient(url);
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(htmlStr);
-                //getAllCrawlText(doc);
-                Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                docStruct ds = new docStruct();
-                //UpdateUIDelegate += updateLabelText;
-                //TaskCallBack += ThisTaskCallBack;
-                ds.doc = doc;
-                tt.Start(ds);
+                if (threadIsEnd)
+                {
+                    t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                    docStruct ds = new docStruct();
+                    ds.doc = doc;
+                    threadIsEnd = false;
+                    t.Start(ds);
+                }
             }
             catch (Exception ex)
             {
@@ -190,19 +199,26 @@ namespace LianjiaCrawl
         {
             //当前地址 nowGetUrl
             //待获取总页数 waitGetPageCount
-            for (int i = 1; i <= waitGetPageCount; i++)
+            for (int i = 1; i <= waitGetPageCount;)
             {
                 if (i != 1)
                 {
                     var htmlStr = GetWebClient(nowGetUrl+"pg"+i.ToString()+"/");
                     HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                     doc.LoadHtml(htmlStr);
-                    Thread tt = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                    docStruct ds = new docStruct();
-                    //UpdateUIDelegate += updateLabelText;
-                    //TaskCallBack += ThisTaskCallBack;
-                    ds.doc = doc;
-                    tt.Start(ds);
+                    if (threadIsEnd)
+                    {
+                        i++;
+                        t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                        docStruct ds = new docStruct();
+                        ds.doc = doc;
+                        threadIsEnd = false;
+                        t.Start(ds);
+                    }
+                    else
+                    {
+                        updateLabelText("duia", "循环等待线程完毕，当前执行的线程数为："+i.ToString());
+                    }
                 }
             }
         }
@@ -223,7 +239,7 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
-                throw new Exception("获取网页内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
+                throw new Exception("获取网页("+url+")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
             }
 
         }
@@ -234,7 +250,6 @@ namespace LianjiaCrawl
         {
             try
             {
-                Bar_kzt.Value = this.Opacity;
                 var htmlStr = GetWebClient(mainUrl);
                 nowGetUrl = mainUrl;
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -277,8 +292,9 @@ namespace LianjiaCrawl
                     }
                 }
                 //当前总共找到XX个房源信息
-                Thread t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
                 docStruct ds = new docStruct();
+                threadIsEnd = false;
                 UpdateUIDelegate += updateLabelText;
                 TaskCallBack += ThisTaskCallBack;
                 ds.doc = doc;
@@ -608,6 +624,7 @@ namespace LianjiaCrawl
             //开始写出文本
             try
             {
+                threadIsEnd = true;
                 string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "UserInfo.txt";
                 String aStr = "";//原来的文本
                 //if (File.Exists(uPath))
