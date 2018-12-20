@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             LayeredSkin.DirectUI.DuiTextBox duiTextBox1 = new LayeredSkin.DirectUI.DuiTextBox();
             this.layeredButton_mini = new LayeredSkin.Controls.LayeredButton();
@@ -42,6 +43,7 @@
             this.label_nowcrawlpage = new LayeredSkin.Controls.LayeredLabel();
             this.label_pagecount = new LayeredSkin.Controls.LayeredLabel();
             this.btn_getAll = new LayeredSkin.Controls.LayeredButton();
+            this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.SuspendLayout();
             // 
             // layeredButton_mini
@@ -408,6 +410,19 @@
             this.btn_getAll.TextShowMode = LayeredSkin.TextShowModes.Halo;
             this.btn_getAll.Click += new System.EventHandler(this.btn_getAll_Click);
             // 
+            // NotifyIcon
+            // 
+            this.NotifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.NotifyIcon.BalloonTipText = "测试提示消息";
+            this.NotifyIcon.BalloonTipTitle = "提示";
+            this.NotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotifyIcon.Icon")));
+            this.NotifyIcon.Text = "链家房源销售采集";
+            this.NotifyIcon.Visible = true;
+            this.NotifyIcon.BalloonTipClicked += new System.EventHandler(this.NotifyIcon_BalloonTipClicked);
+            this.NotifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
+            this.NotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
+            this.NotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
             // MainForm
             // 
             this.AnimationType = LayeredSkin.Forms.AnimationTypes.Custom;
@@ -457,6 +472,7 @@
         public LayeredSkin.Controls.LayeredLabel label_nowcrawlpage;
         public LayeredSkin.Controls.LayeredLabel label_pagecount;
         private LayeredSkin.Controls.LayeredButton btn_getAll;
+        private System.Windows.Forms.NotifyIcon NotifyIcon;
     }
 }
 

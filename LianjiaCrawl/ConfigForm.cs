@@ -72,19 +72,22 @@ namespace LianjiaCrawl
                 }
             }
             this.BackgroundImage = Image.FromFile(imgTextBox.Text);
+            mainForm.BackgroundImage = this.BackgroundImage;
             changeMainform();
         }
         private void layeredTrackBar1_ValueChanged(object sender, EventArgs e)
         {
             LayeredTrackBar ltb = sender as LayeredTrackBar;
-            if (ltb.Name == "Bar_kzt")
+            if (ltb.Name == "tb_kzt")
             {
                 this.Opacity = ltb.Value;
+                mainForm.Opacity = this.Opacity;
                 pes.Opacity = ltb.Value.ToString();
             }
             else
             {
-                this.Radius = int.Parse((ltb.Value * this.Width).ToString());
+                this.Radius = (int)(ltb.Value * this.Width);
+                mainForm.Radius = this.Radius;
                 pes.Radius = ltb.Value.ToString();
             }
             changeMainform();
@@ -94,9 +97,20 @@ namespace LianjiaCrawl
         #region 自定义事件
         private void changeMainform()
         {
+            pes.SoftName = softNameTextBox.Text;
+            pes.BackImg = imgTextBox.Text;
+            pes.Opacity = tb_kzt.Value.ToString();
+            pes.Radius = tb_radius.Value.ToString();
+            pes.FilePath = fileTextBox.Text;
+            pes.Animation = animation.Text;
             mainForm.perUtils = pes;
         }
         #endregion
-        
+
+        private void layeredButton_close_Click(object sender, EventArgs e)
+        {
+            pes.saveConfig();
+            this.Close();
+        }
     }
 }

@@ -166,7 +166,7 @@ namespace LianjiaCrawl
             ConfigurationManager.RefreshSection("appSettings");
         }
 
-        public void saveConfi()
+        public void saveConfig()
         {
             UpdateAppConfig("softName", softName);
             UpdateAppConfig("backImg", backImg);

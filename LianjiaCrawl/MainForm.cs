@@ -55,6 +55,7 @@ namespace LianjiaCrawl
 
         private void layeredButton_close_Click(object sender, EventArgs e)
         {
+            perUtils.saveConfig();
             this.Close();
         }
 
@@ -665,5 +666,40 @@ namespace LianjiaCrawl
             errFrom.ShowDialog();
         }
         #endregion
+
+        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                //skinContextMenuStrip1.Show();
+                MenuStrip ms = new MenuStrip(new Point(Control.MousePosition.X, Control.MousePosition.Y),this);
+                ms.Show();
+            }
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                //还原窗体显示    
+                this.WindowState = FormWindowState.Normal;
+                //激活窗体并给予它焦点
+                this.Activate();
+                //任务栏区显示图标
+                this.ShowInTaskbar = true;
+                //托盘区图标隐藏
+                NotifyIcon.Visible = false;
+            }
+        }
+
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+
+        }
     }
 }
