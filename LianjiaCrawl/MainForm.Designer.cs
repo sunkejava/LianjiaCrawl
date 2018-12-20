@@ -267,14 +267,14 @@
             duiTextBox1.CanFocus = true;
             duiTextBox1.CaretColor = System.Drawing.SystemColors.ControlText;
             duiTextBox1.CaretIndex = 0;
-            duiTextBox1.ClientRectangle = new System.Drawing.Rectangle(0, 0, 100, 12);
+            duiTextBox1.ClientRectangle = new System.Drawing.Rectangle(0, 0, 0, 0);
             duiTextBox1.CurrentCursor = System.Windows.Forms.Cursors.Default;
             duiTextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
             duiTextBox1.Dock = System.Windows.Forms.DockStyle.None;
             duiTextBox1.Enabled = true;
             duiTextBox1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             duiTextBox1.ForeColor = System.Drawing.SystemColors.ControlText;
-            duiTextBox1.Height = 12;
+            duiTextBox1.Height = 0;
             duiTextBox1.IsInsert = true;
             duiTextBox1.IsMoveParentPaint = true;
             duiTextBox1.Left = 0;
@@ -295,14 +295,14 @@
             duiTextBox1.SelectionStart = 0;
             duiTextBox1.ShowBorder = true;
             duiTextBox1.ShowScrollBar = true;
-            duiTextBox1.Size = new System.Drawing.Size(100, 12);
+            duiTextBox1.Size = new System.Drawing.Size(0, 0);
             duiTextBox1.SuspendInvalidate = false;
             duiTextBox1.Tag = null;
             duiTextBox1.Text = "";
             duiTextBox1.TextRenderMode = System.Drawing.Text.TextRenderingHint.SystemDefault;
             duiTextBox1.Top = 0;
             duiTextBox1.Visible = true;
-            duiTextBox1.Width = 100;
+            duiTextBox1.Width = 0;
             this.lp_panel.DUIControls.AddRange(new LayeredSkin.DirectUI.DuiBaseControl[] {
             duiTextBox1});
             this.lp_panel.Location = new System.Drawing.Point(12, 229);

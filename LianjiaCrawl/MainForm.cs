@@ -63,7 +63,7 @@ namespace LianjiaCrawl
         private void MainForm_Load(object sender, EventArgs e)
         {
             this.Radius = int.Parse(perUtils.Radius);
-            this.Opacity = int.Parse(perUtils.Opacity);
+            this.Opacity = double.Parse(perUtils.Opacity);
             if (perUtils.BackImg != "")
             {
                 this.BackgroundImage = Image.FromFile(perUtils.BackImg);
@@ -198,30 +198,8 @@ namespace LianjiaCrawl
 
         private void btn_getAll_Click(object sender, EventArgs e)
         {
-            //当前地址 nowGetUrl
-            //待获取总页数 waitGetPageCount
-            for (int i = 1; i <= waitGetPageCount;)
-            {
-                if (i != 1)
-                {
-                    var htmlStr = GetWebClient(nowGetUrl+"pg"+i.ToString()+"/");
-                    HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                    doc.LoadHtml(htmlStr);
-                    if (threadIsEnd)
-                    {
-                        i++;
-                        t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                        docStruct ds = new docStruct();
-                        ds.doc = doc;
-                        threadIsEnd = false;
-                        t.Start(ds);
-                    }
-                    else
-                    {
-                        updateLabelText("duia", "循环等待线程完毕，当前执行的线程数为："+i.ToString());
-                    }
-                }
-            }
+            Thread bt = new Thread(new ThreadStart(GetAllHouseSaleDetail));
+            bt.Start();
         }
         #endregion
 
@@ -513,6 +491,7 @@ namespace LianjiaCrawl
                 {
                     showErrorMessage("获取房源信息出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                 }
+                threadIsEnd = true;
             }
             
         }
@@ -657,7 +636,32 @@ namespace LianjiaCrawl
                 showErrorMessage("写出信息失败，原因为："+e.Message+e.StackTrace.ToString());
             }
         }
-
+        private void GetAllHouseSaleDetail()
+        {
+            //当前地址 nowGetUrl
+            //待获取总页数 waitGetPageCount
+            for (int i = 2; i <= waitGetPageCount;)
+            {
+                    if (threadIsEnd)
+                    {
+                        //采集暂停时间段，避免次数过多造成访问失败
+                        Thread.Sleep(int.Parse(perUtils.StopTimeLength)*1000);
+                        var htmlStr = GetWebClient(nowGetUrl + "pg" + i.ToString() + "/");
+                        HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                        doc.LoadHtml(htmlStr);
+                        t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                        docStruct ds = new docStruct();
+                        ds.doc = doc;
+                        threadIsEnd = false;
+                        t.Start(ds);
+                        i++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("循环等待线程完毕，当前执行的线程数为：" + i.ToString()+"----"+DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+            }
+        }
         private void showErrorMessage(string errStr)
         {
             MessageForm errFrom = new MessageForm(errStr);

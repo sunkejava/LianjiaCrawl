@@ -22,6 +22,7 @@ namespace LianjiaCrawl
         private string opacity = "1";
         private string animation = "GradualCurtainEffect";
         private string filePath = "";
+        private string stopTimeLength = "";
         public PropertsUtils()
         {
             this.softName = GetAppConfig("softName");
@@ -30,6 +31,7 @@ namespace LianjiaCrawl
             this.opacity = GetAppConfig("Opacity");
             this.animation = GetAppConfig("Animation");
             this.filePath = GetAppConfig("filePath");
+            this.stopTimeLength = GetAppConfig("stopTimeLength");
         }
         /// <summary>
         /// 软件名称
@@ -121,6 +123,17 @@ namespace LianjiaCrawl
                 filePath = value;
             }
         }
+        /// <summary>
+        /// 暂停时间长度，单位为秒
+        /// </summary>
+        public string StopTimeLength {
+            get {
+                return stopTimeLength;
+                 }
+            set {
+                stopTimeLength = value;
+            }
+        }
 
         /// <summary>
         /// 根据Key值获取value值
@@ -174,6 +187,7 @@ namespace LianjiaCrawl
             UpdateAppConfig("Opacity", opacity);
             UpdateAppConfig("Animation", animation);
             UpdateAppConfig("filePath", filePath);
+            UpdateAppConfig("stopTimeLength", stopTimeLength);
         }
     }
 }

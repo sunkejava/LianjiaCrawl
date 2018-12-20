@@ -19,6 +19,7 @@ namespace LianjiaCrawl
         DuiTextBox softNameTextBox = new DuiTextBox();
         DuiTextBox imgTextBox = new DuiTextBox();
         DuiTextBox fileTextBox = new DuiTextBox();
+        DuiTextBox timeLengthTextBox = new DuiTextBox();
         DuiComboBox animation = new DuiComboBox();
         PropertsUtils pes = new PropertsUtils();
         MainForm mainForm = new MainForm();
@@ -33,21 +34,31 @@ namespace LianjiaCrawl
             softNameTextBox.Text = pes.SoftName;
             imgTextBox.Text = pes.BackImg;
             fileTextBox.Text = pes.FilePath;
+            timeLengthTextBox.Text = pes.StopTimeLength;
             tb_radius.Value = Double.Parse(pes.Radius) / mainForm.Width;
             tb_kzt.Value = Double.Parse(pes.Opacity);
             animation.Text =  pes.Animation;
             animation.Size = new Size(267,20);
             softNameTextBox.Size = new Size(267,20);
+            timeLengthTextBox.Size = softNameTextBox.Size;
             imgTextBox.Size = new Size(237,20);
             fileTextBox.Size = imgTextBox.Size;
-            softNameTextBox.Location = new Point(107,17);
-            imgTextBox.Location = new Point(107,48);
-            fileTextBox.Location = new Point(107,185);
-            animation.Location = new Point(107,148);
+            softNameTextBox.Location = new Point(107,15);
+            imgTextBox.Location = new Point(107,46);
+            fileTextBox.Location = new Point(107,183);
+            animation.Location = new Point(107,146);
+            timeLengthTextBox.Location = new Point(107,217);
             panel_xc.DUIControls.Add(softNameTextBox);
             panel_xc.DUIControls.Add(imgTextBox);
             panel_xc.DUIControls.Add(fileTextBox);
             panel_xc.DUIControls.Add(animation);
+            panel_xc.DUIControls.Add(timeLengthTextBox);
+        }
+
+        private void layeredButton_close_Click(object sender, EventArgs e)
+        {
+            pes.saveConfig();
+            this.Close();
         }
         #endregion
 
@@ -100,17 +111,13 @@ namespace LianjiaCrawl
             pes.SoftName = softNameTextBox.Text;
             pes.BackImg = imgTextBox.Text;
             pes.Opacity = tb_kzt.Value.ToString();
-            pes.Radius = tb_radius.Value.ToString();
+            pes.Radius = (tb_radius.Value*mainForm.Width).ToString();
             pes.FilePath = fileTextBox.Text;
             pes.Animation = animation.Text;
+            pes.StopTimeLength = timeLengthTextBox.Text;
             mainForm.perUtils = pes;
         }
         #endregion
 
-        private void layeredButton_close_Click(object sender, EventArgs e)
-        {
-            pes.saveConfig();
-            this.Close();
-        }
     }
 }

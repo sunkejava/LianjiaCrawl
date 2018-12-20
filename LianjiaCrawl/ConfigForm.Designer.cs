@@ -41,6 +41,7 @@
             this.lb_softname = new LayeredSkin.Controls.LayeredLabel();
             this.lb_Opacity = new LayeredSkin.Controls.LayeredLabel();
             this.layeredButton_close = new LayeredSkin.Controls.LayeredButton();
+            this.layeredLabel1 = new LayeredSkin.Controls.LayeredLabel();
             this.panel_xc.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,6 +60,7 @@
             this.panel_xc.Borders.TopColor = System.Drawing.Color.Empty;
             this.panel_xc.Borders.TopWidth = 1;
             this.panel_xc.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("panel_xc.Canvas")));
+            this.panel_xc.Controls.Add(this.layeredLabel1);
             this.panel_xc.Controls.Add(this.lb_Animation);
             this.panel_xc.Controls.Add(this.btn_filePath);
             this.panel_xc.Controls.Add(this.lb_filePath);
@@ -71,7 +73,7 @@
             this.panel_xc.Controls.Add(this.lb_Opacity);
             this.panel_xc.Location = new System.Drawing.Point(12, 27);
             this.panel_xc.Name = "panel_xc";
-            this.panel_xc.Size = new System.Drawing.Size(442, 223);
+            this.panel_xc.Size = new System.Drawing.Size(442, 255);
             this.panel_xc.TabIndex = 0;
             // 
             // lb_Animation
@@ -351,6 +353,25 @@
             this.layeredButton_close.TextShowMode = LayeredSkin.TextShowModes.Halo;
             this.layeredButton_close.Click += new System.EventHandler(this.layeredButton_close_Click);
             // 
+            // layeredLabel1
+            // 
+            this.layeredLabel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.layeredLabel1.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.layeredLabel1.Borders.BottomWidth = 1;
+            this.layeredLabel1.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.layeredLabel1.Borders.LeftWidth = 1;
+            this.layeredLabel1.Borders.RightColor = System.Drawing.Color.Empty;
+            this.layeredLabel1.Borders.RightWidth = 1;
+            this.layeredLabel1.Borders.TopColor = System.Drawing.Color.Empty;
+            this.layeredLabel1.Borders.TopWidth = 1;
+            this.layeredLabel1.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("layeredLabel1.Canvas")));
+            this.layeredLabel1.HaloSize = 5;
+            this.layeredLabel1.Location = new System.Drawing.Point(43, 219);
+            this.layeredLabel1.Name = "layeredLabel1";
+            this.layeredLabel1.Size = new System.Drawing.Size(71, 18);
+            this.layeredLabel1.TabIndex = 30;
+            this.layeredLabel1.Text = "时间间隔：";
+            // 
             // ConfigForm
             // 
             this.AnimationType = LayeredSkin.Forms.AnimationTypes.GradualCurtainEffect;
@@ -358,7 +379,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::LianjiaCrawl.Properties.Resources._471821;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(466, 262);
+            this.ClientSize = new System.Drawing.Size(466, 294);
             this.Controls.Add(this.layeredButton_close);
             this.Controls.Add(this.panel_xc);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -387,5 +408,6 @@
         private LayeredSkin.Controls.LayeredLabel lb_filePath;
         private LayeredSkin.Controls.LayeredLabel lb_Animation;
         private LayeredSkin.Controls.LayeredButton layeredButton_close;
+        private LayeredSkin.Controls.LayeredLabel layeredLabel1;
     }
 }
