@@ -404,17 +404,18 @@ namespace LianjiaCrawl
         /// <param name="doc"></param>
         private void getAllCrawlText(Object ob)
         {
+            docStruct ds = (docStruct)ob;
+            HtmlAgilityPack.HtmlDocument doc = ds.doc;
+            var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]");
             try
             {
-                docStruct ds = (docStruct)ob;
-                HtmlAgilityPack.HtmlDocument doc = ds.doc;
                 DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
                 duia.Dock = DockStyle.Fill;
                 duia.Multiline = true;
                 duia.Size = new Size(999, 389);
                 duia.Text = "";
                 //当前页数、总页数
-                var res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
                 string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
                 JObject jo = (JObject)JsonConvert.DeserializeObject(str);
                 string pcount = "";
@@ -489,7 +490,7 @@ namespace LianjiaCrawl
                 }
                 else
                 {
-                    showErrorMessage("获取房源信息出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                    showErrorMessage("获取房源信息出错,原因为：" + ex.Message + ex.StackTrace.ToString()+"分析全部代码："+doc.Text+"======全部代码结尾，相信解析后错误代码："+res.OuterHtml);
                 }
                 threadIsEnd = true;
             }
@@ -503,6 +504,8 @@ namespace LianjiaCrawl
         {
             try
             {
+                //暂停时间
+                Thread.Sleep(int.Parse(perUtils.StopTimeLength));
                 var htmlStr = GetWebClient(url);
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(htmlStr);
