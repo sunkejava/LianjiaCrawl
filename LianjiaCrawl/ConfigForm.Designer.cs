@@ -208,6 +208,7 @@
             this.tb_radius.TabIndex = 13;
             this.tb_radius.Text = "layeredTrackBar1";
             this.tb_radius.Value = 0.5D;
+            this.tb_radius.ValueChanged += new System.EventHandler(this.layeredTrackBar1_ValueChanged);
             // 
             // lb_Radius
             // 
@@ -360,11 +361,11 @@
             this.ClientSize = new System.Drawing.Size(466, 262);
             this.Controls.Add(this.layeredButton_close);
             this.Controls.Add(this.panel_xc);
-            this.EnableAnimation = false;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ConfigForm";
             this.Radius = 15;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "设置";
             this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.panel_xc.ResumeLayout(false);

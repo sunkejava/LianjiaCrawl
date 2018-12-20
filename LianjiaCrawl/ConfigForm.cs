@@ -24,8 +24,8 @@ namespace LianjiaCrawl
         MainForm mainForm = new MainForm();
         public ConfigForm(MainForm tmainForm)
         {
-            InitializeComponent();
             mainForm = tmainForm;
+            InitializeComponent();
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -33,8 +33,8 @@ namespace LianjiaCrawl
             softNameTextBox.Text = pes.SoftName;
             imgTextBox.Text = pes.BackImg;
             fileTextBox.Text = pes.FilePath;
-            tb_radius.Value = int.Parse(pes.Radius);
-            tb_kzt.Value = int.Parse(pes.Opacity)/100;
+            tb_radius.Value = Double.Parse(pes.Radius) / mainForm.Width;
+            tb_kzt.Value = Double.Parse(pes.Opacity);
             animation.Text =  pes.Animation;
             animation.Size = new Size(267,20);
             softNameTextBox.Size = new Size(267,20);
@@ -81,12 +81,12 @@ namespace LianjiaCrawl
             if (ltb.Name == "tb_kzt")
             {
                 this.Opacity = ltb.Value;
-                mainForm.Opacity = this.Opacity;
+                mainForm.Opacity = ltb.Value;
                 pes.Opacity = ltb.Value.ToString();
             }
             else
             {
-                this.Radius = (int)(ltb.Value * this.Width);
+                this.Radius = (int)(ltb.Value * mainForm.Width);
                 mainForm.Radius = this.Radius;
                 pes.Radius = ltb.Value.ToString();
             }

@@ -292,7 +292,6 @@ namespace LianjiaCrawl
                         Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
                     }
                 }
-                //当前总共找到XX个房源信息
                 t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
                 docStruct ds = new docStruct();
                 threadIsEnd = false;
@@ -300,7 +299,6 @@ namespace LianjiaCrawl
                 TaskCallBack += ThisTaskCallBack;
                 ds.doc = doc;
                 t.Start(ds);
-                //getAllCrawlText(doc);
             }
             catch (Exception ex)
             {
@@ -669,8 +667,16 @@ namespace LianjiaCrawl
 
         private void layeredButton1_Click(object sender, EventArgs e)
         {
-            ConfigForm cf = new ConfigForm(this);
-            cf.ShowDialog();
+            try
+            {
+                ConfigForm cf = new ConfigForm(this);
+                cf.Show();
+            }
+            catch (Exception ex)
+            {
+                showErrorMessage(ex.Message + ex.StackTrace.ToString());
+            }
+            
         }
     }
 }
