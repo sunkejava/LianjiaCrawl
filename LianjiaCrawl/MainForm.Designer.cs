@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             LayeredSkin.DirectUI.DuiTextBox duiTextBox1 = new LayeredSkin.DirectUI.DuiTextBox();
             this.layeredButton_mini = new LayeredSkin.Controls.LayeredButton();
@@ -43,7 +42,7 @@
             this.label_nowcrawlpage = new LayeredSkin.Controls.LayeredLabel();
             this.label_pagecount = new LayeredSkin.Controls.LayeredLabel();
             this.btn_getAll = new LayeredSkin.Controls.LayeredButton();
-            this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.layeredButton1 = new LayeredSkin.Controls.LayeredButton();
             this.SuspendLayout();
             // 
             // layeredButton_mini
@@ -410,18 +409,38 @@
             this.btn_getAll.TextShowMode = LayeredSkin.TextShowModes.Halo;
             this.btn_getAll.Click += new System.EventHandler(this.btn_getAll_Click);
             // 
-            // NotifyIcon
+            // layeredButton1
             // 
-            this.NotifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.NotifyIcon.BalloonTipText = "测试提示消息";
-            this.NotifyIcon.BalloonTipTitle = "提示";
-            this.NotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotifyIcon.Icon")));
-            this.NotifyIcon.Text = "链家房源销售采集";
-            this.NotifyIcon.Visible = true;
-            this.NotifyIcon.BalloonTipClicked += new System.EventHandler(this.NotifyIcon_BalloonTipClicked);
-            this.NotifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
-            this.NotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
-            this.NotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            this.layeredButton1.AdaptImage = true;
+            this.layeredButton1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.layeredButton1.BaseColor = System.Drawing.Color.Transparent;
+            this.layeredButton1.Borders.BottomColor = System.Drawing.Color.Empty;
+            this.layeredButton1.Borders.BottomWidth = 1;
+            this.layeredButton1.Borders.LeftColor = System.Drawing.Color.Empty;
+            this.layeredButton1.Borders.LeftWidth = 1;
+            this.layeredButton1.Borders.RightColor = System.Drawing.Color.Empty;
+            this.layeredButton1.Borders.RightWidth = 1;
+            this.layeredButton1.Borders.TopColor = System.Drawing.Color.Empty;
+            this.layeredButton1.Borders.TopWidth = 1;
+            this.layeredButton1.Canvas = ((System.Drawing.Bitmap)(resources.GetObject("layeredButton1.Canvas")));
+            this.layeredButton1.ControlState = LayeredSkin.Controls.ControlStates.Normal;
+            this.layeredButton1.HaloColor = System.Drawing.Color.White;
+            this.layeredButton1.HaloSize = 5;
+            this.layeredButton1.HoverImage = null;
+            this.layeredButton1.IsPureColor = false;
+            this.layeredButton1.Location = new System.Drawing.Point(865, 30);
+            this.layeredButton1.Name = "layeredButton1";
+            this.layeredButton1.NormalImage = null;
+            this.layeredButton1.PressedImage = null;
+            this.layeredButton1.Radius = 10;
+            this.layeredButton1.ShowBorder = true;
+            this.layeredButton1.Size = new System.Drawing.Size(47, 30);
+            this.layeredButton1.TabIndex = 25;
+            this.layeredButton1.Text = "设置";
+            this.layeredButton1.TextLocationOffset = new System.Drawing.Point(0, 0);
+            this.layeredButton1.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            this.layeredButton1.TextShowMode = LayeredSkin.TextShowModes.Halo;
+            this.layeredButton1.Click += new System.EventHandler(this.layeredButton1_Click);
             // 
             // MainForm
             // 
@@ -432,6 +451,7 @@
             this.BackgroundImage = global::LianjiaCrawl.Properties.Resources._471821;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1023, 674);
+            this.Controls.Add(this.layeredButton1);
             this.Controls.Add(this.btn_getAll);
             this.Controls.Add(this.label_pagecount);
             this.Controls.Add(this.label_nowcrawlpage);
@@ -450,7 +470,6 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Radius = 15;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "链家二手房信息销售信息采集";
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -472,7 +491,7 @@
         public LayeredSkin.Controls.LayeredLabel label_nowcrawlpage;
         public LayeredSkin.Controls.LayeredLabel label_pagecount;
         private LayeredSkin.Controls.LayeredButton btn_getAll;
-        private System.Windows.Forms.NotifyIcon NotifyIcon;
+        private LayeredSkin.Controls.LayeredButton layeredButton1;
     }
 }
 
