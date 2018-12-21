@@ -201,6 +201,19 @@ namespace LianjiaCrawl
             Thread bt = new Thread(new ThreadStart(GetAllHouseSaleDetail));
             bt.Start();
         }
+
+        private void layeredButton1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ConfigForm cf = new ConfigForm(this);
+                cf.Show();
+            }
+            catch (Exception ex)
+            {
+                showErrorMessage(ex.Message + ex.StackTrace.ToString());
+            }
+        }
         #endregion
 
         #region 自定义事件
@@ -414,24 +427,41 @@ namespace LianjiaCrawl
                 duia.Multiline = true;
                 duia.Size = new Size(999, 389);
                 duia.Text = "";
-                //当前页数、总页数
-                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
-                string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
-                JObject jo = (JObject)JsonConvert.DeserializeObject(str);
                 string pcount = "";
                 string npage = "";
-                foreach (var item in jo)
+                //当前页数、总页数 规则1
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
+                if (res == null)
                 {
-                    if (item.Key.Contains("totalPage"))
+                    //获取页数规则2
+                    res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[9]/div[2]");
+                }
+                if (res == null)
+                {
+                    //还是为null则表示只有一页或压根没数据
+                    pcount = "1";
+                    waitGetPageCount = 1;
+                    npage = "1";
+                }
+                else
+                {
+                    string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
+                    JObject jo = (JObject)JsonConvert.DeserializeObject(str);
+                    
+                    foreach (var item in jo)
                     {
-                        pcount = item.Value.ToString();
-                        waitGetPageCount = int.Parse(pcount);
-                    }
-                    else
-                    {
-                        npage = item.Value.ToString();
+                        if (item.Key.Contains("totalPage"))
+                        {
+                            pcount = item.Value.ToString();
+                            waitGetPageCount = int.Parse(pcount);
+                        }
+                        else
+                        {
+                            npage = item.Value.ToString();
+                        }
                     }
                 }
+                
                 UpdateUIDelegate("label_pagecount", "总页数：" + pcount);
                 //label_pagecount.Text = "总页数：" + pcount;
                 UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！");
@@ -444,7 +474,7 @@ namespace LianjiaCrawl
                     foreach (var item in astr)
                     {
                         var count = item.InnerText;
-                        findCountHouse = "共找到" + count.ToString() + "套北京在售二手房源";
+                        findCountHouse = "共找到" + count.ToString() + "套 "+yjname+" "+ejname+"在售二手房源";
                     }
                 }
                 UpdateUIDelegate("label_count", findCountHouse);
@@ -490,7 +520,16 @@ namespace LianjiaCrawl
                 }
                 else
                 {
-                    showErrorMessage("获取房源信息出错,原因为：" + ex.Message + ex.StackTrace.ToString()+"分析全部代码："+doc.Text+"======全部代码结尾，相信解析后错误代码："+res.OuterHtml);
+                    string errStr = "获取房源(" + nowGetUrl + "）信息出错,原因为：" + ex.Message + ex.StackTrace.ToString();
+                    if (doc != null)
+                    {
+                        errStr += "<<<<<<<<<<<<<<<<<<<分析全部代码：" + doc.Text;
+                    }
+                    if (res != null)
+                    {
+                        errStr += "======全部代码结尾，相信解析后错误代码：" + res.OuterHtml;
+                    }
+                    showErrorMessage(errStr);
                 }
                 threadIsEnd = true;
             }
@@ -672,18 +711,6 @@ namespace LianjiaCrawl
         }
         #endregion
 
-        private void layeredButton1_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                ConfigForm cf = new ConfigForm(this);
-                cf.Show();
-            }
-            catch (Exception ex)
-            {
-                showErrorMessage(ex.Message + ex.StackTrace.ToString());
-            }
-            
-        }
+        
     }
 }
