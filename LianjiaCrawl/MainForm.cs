@@ -106,7 +106,7 @@ namespace LianjiaCrawl
                         var tags = item.InnerText;
                         var name = item.InnerText;
                         Entity.SelectEntity area = new Entity.SelectEntity();
-                        area.Url = "https://bj.lianjia.com" + aurl;
+                        area.Url = "https://" + new Uri(nowGetUrl).Host + aurl;
                         area.Rtag = tags;
                         area.Name = name;
                         selectChidens.Add(area);
@@ -283,13 +283,13 @@ namespace LianjiaCrawl
                         Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
                     }
                 }
-                t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                docStruct ds = new docStruct();
-                threadIsEnd = false;
-                UpdateUIDelegate += updateLabelText;
-                TaskCallBack += ThisTaskCallBack;
-                ds.doc = doc;
-                t.Start(ds);
+                //t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                //docStruct ds = new docStruct();
+                //threadIsEnd = false;
+                //UpdateUIDelegate += updateLabelText;
+                //TaskCallBack += ThisTaskCallBack;
+                //ds.doc = doc;
+                //t.Start(ds);
             }
             catch (Exception ex)
             {
@@ -665,7 +665,7 @@ namespace LianjiaCrawl
                 DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
                 aStr += duia.Text;
                 //添加新的文本信息
-                StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
+                StreamWriter sw = new StreamWriter(uPath, false, System.Text.Encoding.Default);
                 //开始写入
                 sw.Write(aStr);
                 //清空缓冲区
@@ -696,6 +696,7 @@ namespace LianjiaCrawl
                         ds.doc = doc;
                         threadIsEnd = false;
                         t.Start(ds);
+                        t.Join();
                         i++;
                     }
                     else
@@ -708,6 +709,20 @@ namespace LianjiaCrawl
         {
             MessageForm errFrom = new MessageForm(errStr);
             errFrom.ShowDialog();
+        }
+
+        private void showTimerSessage()
+        {
+            DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
+            duia.Text = "";
+            UpdateUIDelegate("duia","规避采集机制，系统自动分配"+ perUtils.StopTimeLength +"秒后继续获取数据，请稍后...." +"\r\n");
+            for (int i = 0; i < int.Parse(perUtils.StopTimeLength); i++)
+            {
+                UpdateUIDelegate("duia", "请耐心等待，"+(int.Parse(perUtils.StopTimeLength)-(i+1)).ToString() +"秒后系统继续执行采集！"+ "\r\n");
+                Thread.Sleep(1000);
+            }
+            UpdateUIDelegate("duia", "继续采集开始！" + "\r\n");
+
         }
         #endregion
 

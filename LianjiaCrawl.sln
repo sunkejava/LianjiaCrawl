@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LianjiaCrawl", "LianjiaCrawl\LianjiaCrawl.csproj", "{8E72B876-9F83-4724-8220-C0A10956787E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "..\..\CSkinTest\Demo2014-12-10\test\test.csproj", "{7B6EB342-3764-45E3-A0E9-5CD553525A17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,19 @@ Global
 		{8E72B876-9F83-4724-8220-C0A10956787E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E72B876-9F83-4724-8220-C0A10956787E}.Release|x86.ActiveCfg = Release|x86
 		{8E72B876-9F83-4724-8220-C0A10956787E}.Release|x86.Build.0 = Release|x86
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Debug|x86.Build.0 = Debug|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Release|x86.ActiveCfg = Release|Any CPU
+		{7B6EB342-3764-45E3-A0E9-5CD553525A17}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A25E28B-D5E9-4A20-89C6-152EB2DE30E4}
 	EndGlobalSection
 EndGlobal

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using LayeredSkin.Forms;
 using LayeredSkin.Controls;
 using LayeredSkin.DirectUI;
+using System.IO;
 
 namespace LianjiaCrawl
 {
@@ -32,22 +33,32 @@ namespace LianjiaCrawl
         private void ConfigForm_Load(object sender, EventArgs e)
         {
             softNameTextBox.Text = pes.SoftName;
-            imgTextBox.Text = pes.BackImg;
-            fileTextBox.Text = pes.FilePath;
+            imgTextBox.Text = (String.IsNullOrEmpty(pes.BackImg) ? "系统内置或不存在背景图" : pes.BackImg);
+            fileTextBox.Text = (String.IsNullOrEmpty(pes.FilePath) ? Application.StartupPath : pes.FilePath);
             timeLengthTextBox.Text = pes.StopTimeLength;
             tb_radius.Value = Double.Parse(pes.Radius) / mainForm.Width;
             tb_kzt.Value = Double.Parse(pes.Opacity);
             animation.Text =  pes.Animation;
-            animation.Size = new Size(267,20);
-            softNameTextBox.Size = new Size(267,20);
+            for (int i = 0; i < 3; i++)
+            {
+                DuiBaseControl dba1 = new DuiBaseControl();
+                DuiLabel dla1 = new DuiLabel();
+                dla1.Size = new Size(265, 15);
+                dba1.Size = dla1.Size;
+                dla1.Text = "测试项目"+i.ToString();
+                dba1.Controls.Add(dla1);
+                animation.Items.Add(dba1);
+            }
+            animation.Size = new Size(267,17);
+            softNameTextBox.Size = new Size(267,17);
             timeLengthTextBox.Size = softNameTextBox.Size;
-            imgTextBox.Size = new Size(237,20);
+            imgTextBox.Size = new Size(237,17);
             fileTextBox.Size = imgTextBox.Size;
-            softNameTextBox.Location = new Point(107,15);
-            imgTextBox.Location = new Point(107,46);
-            fileTextBox.Location = new Point(107,183);
+            softNameTextBox.Location = new Point(107,17);
+            imgTextBox.Location = new Point(107,48);
+            fileTextBox.Location = new Point(107,185);
             animation.Location = new Point(107,146);
-            timeLengthTextBox.Location = new Point(107,217);
+            timeLengthTextBox.Location = new Point(107,219);
             panel_xc.DUIControls.Add(softNameTextBox);
             panel_xc.DUIControls.Add(imgTextBox);
             panel_xc.DUIControls.Add(fileTextBox);
@@ -81,10 +92,10 @@ namespace LianjiaCrawl
                 {
                     imgTextBox.Text = file;
                 }
+                this.BackgroundImage = Image.FromFile(imgTextBox.Text);
+                mainForm.BackgroundImage = this.BackgroundImage;
+                changeMainform();
             }
-            this.BackgroundImage = Image.FromFile(imgTextBox.Text);
-            mainForm.BackgroundImage = this.BackgroundImage;
-            changeMainform();
         }
         private void layeredTrackBar1_ValueChanged(object sender, EventArgs e)
         {
@@ -103,6 +114,28 @@ namespace LianjiaCrawl
             }
             changeMainform();
         }
+
+        private void btn_filePath_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            if (!string.IsNullOrEmpty(fileTextBox.Text))
+            {
+                string filePath = System.IO.Path.GetDirectoryName(fileTextBox.Text);
+                fileDialog.InitialDirectory = filePath;
+            }
+            else
+            {
+                fileDialog.InitialDirectory = Application.StartupPath;
+            }
+            fileDialog.Multiselect = false;
+            fileDialog.Title = "请选择目录";
+            fileDialog.Filter = "所有文件(*.*)|*.*";
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                fileTextBox.Text = Path.GetDirectoryName(fileDialog.FileName);
+                changeMainform();
+            }
+        }
         #endregion
 
         #region 自定义事件
@@ -119,5 +152,6 @@ namespace LianjiaCrawl
         }
         #endregion
 
+        
     }
 }
