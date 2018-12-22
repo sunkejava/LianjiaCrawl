@@ -463,7 +463,6 @@
             this.Controls.Add(this.layeredLabel2);
             this.Controls.Add(this.layeredButton_close);
             this.Controls.Add(this.layeredButton_mini);
-            this.EnableAnimation = false;
             this.HaloColor = System.Drawing.Color.Gray;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;

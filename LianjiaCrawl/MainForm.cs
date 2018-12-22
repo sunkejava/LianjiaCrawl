@@ -68,9 +68,12 @@ namespace LianjiaCrawl
             {
                 this.BackgroundImage = Image.FromFile(perUtils.BackImg);
             }
+            if (perUtils.Animation != "")
+            {
+                checkAnimation();
+            }
             Thread at = new Thread(new ThreadStart(getAreasAndSubway));
             at.Start();
-            //getAreasAndSubway();
         }
 
         private void Button_area_Click(object sender, EventArgs e)
@@ -283,13 +286,13 @@ namespace LianjiaCrawl
                         Console.WriteLine("name:" + name + "---tags:" + tags + "---url:" + aurl);
                     }
                 }
-                //t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
-                //docStruct ds = new docStruct();
-                //threadIsEnd = false;
-                //UpdateUIDelegate += updateLabelText;
-                //TaskCallBack += ThisTaskCallBack;
-                //ds.doc = doc;
-                //t.Start(ds);
+                t = new Thread(new ParameterizedThreadStart(getAllCrawlText));
+                docStruct ds = new docStruct();
+                threadIsEnd = false;
+                UpdateUIDelegate += updateLabelText;
+                TaskCallBack += ThisTaskCallBack;
+                ds.doc = doc;
+                t.Start(ds);
             }
             catch (Exception ex)
             {
@@ -724,8 +727,34 @@ namespace LianjiaCrawl
             UpdateUIDelegate("duia", "继续采集开始！" + "\r\n");
 
         }
+
+        private void checkAnimation()
+        {
+            switch (perUtils.Animation)
+            {
+                case "Custom":
+                    this.AnimationType = AnimationTypes.Custom;
+                    break;
+                case "FadeinFadeoutEffect":
+                    this.AnimationType = AnimationTypes.FadeinFadeoutEffect;
+                    break;
+                case "GradualCurtainEffect":
+                    this.AnimationType = AnimationTypes.GradualCurtainEffect;
+                    break;
+                case "RotateZoomEffect":
+                    this.AnimationType = AnimationTypes.RotateZoomEffect;
+                    break;
+                case "ThreeDTurn":
+                    this.AnimationType = AnimationTypes.ThreeDTurn;
+                    break;
+                default:
+                    this.AnimationType = AnimationTypes.ZoomEffect;
+                    break;
+            }
+        }
+
         #endregion
 
-        
+
     }
 }
