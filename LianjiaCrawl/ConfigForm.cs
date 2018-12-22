@@ -33,23 +33,46 @@ namespace LianjiaCrawl
         private void ConfigForm_Load(object sender, EventArgs e)
         {
             softNameTextBox.Text = pes.SoftName;
-            imgTextBox.Text = (String.IsNullOrEmpty(pes.BackImg) ? "系统内置或不存在背景图" : pes.BackImg);
+            imgTextBox.Text = (String.IsNullOrEmpty(pes.BackImg) ? "" : pes.BackImg);
             fileTextBox.Text = (String.IsNullOrEmpty(pes.FilePath) ? Application.StartupPath : pes.FilePath);
             timeLengthTextBox.Text = pes.StopTimeLength;
             tb_radius.Value = Double.Parse(pes.Radius) / mainForm.Width;
             tb_kzt.Value = Double.Parse(pes.Opacity);
             animation.Text =  pes.Animation;
-            for (int i = 0; i < 3; i++)
-            {
-                DuiBaseControl dba1 = new DuiBaseControl();
-                DuiLabel dla1 = new DuiLabel();
-                dla1.Size = new Size(265, 15);
-                dba1.Size = dla1.Size;
-                dla1.Text = "测试项目"+i.ToString();
-                dba1.Controls.Add(dla1);
-                animation.Items.Add(dba1);
-            }
+            animation.AutoDrawSelecedItem = true;
+            animation.InnerListBox.ItemSize = new System.Drawing.Size(265, 18);
+            animation.InnerListBox.Orientation = LayeredSkin.Controls.ListOrientation.Vertical;
+            animation.InnerListBox.ShowScrollBar = true;
+            animation.InnerListBox.BackColor = Color.Transparent;
+            animation.IsMoveParentPaint = true;
+            animation.InnerListBox.Size = new System.Drawing.Size(265, 75);
             animation.Size = new Size(267,17);
+            DuiLabel dlb = new DuiLabel();
+            dlb.Size = new Size(265,15);
+            dlb.Location = new Point(0, 0);
+            dlb.Text = "测试账号一";
+            DuiLabel dlb2 = new DuiLabel();
+            dlb2.Size = new Size(265, 15);
+            dlb2.Location = new Point(0, 15);
+            dlb2.Text = "测试账号二";
+            DuiLabel dlb3 = new DuiLabel();
+            dlb3.Size = new Size(265, 15);
+            dlb3.Location = new Point(0, 30);
+            dlb3.Text = "测试账号三";
+            DuiLabel dlb4 = new DuiLabel();
+            dlb4.Size = new Size(265, 15);
+            dlb4.Location = new Point(0, 45);
+            dlb4.Text = "测试账号四";
+            DuiLabel dlb5 = new DuiLabel();
+            dlb5.Size = new Size(265, 15);
+            dlb5.Location = new Point(0, 60);
+            dlb5.Text = "测试账号五";
+            animation.Items.AddRange(new LayeredSkin.DirectUI.DuiBaseControl[] {
+            dlb,
+            dlb2,
+            dlb3,
+            dlb4,
+            dlb5});
             softNameTextBox.Size = new Size(267,17);
             timeLengthTextBox.Size = softNameTextBox.Size;
             imgTextBox.Size = new Size(237,17);
