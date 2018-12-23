@@ -582,7 +582,7 @@ namespace LianjiaCrawl
             try
             {
                 //暂停时间
-                Thread.Sleep(int.Parse(perUtils.StopTimeLength));
+                Thread.Sleep(int.Parse(perUtils.StopTimeLength)*10);
                 var htmlStr = GetWebClient(url);
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(htmlStr);
@@ -705,7 +705,7 @@ namespace LianjiaCrawl
                 DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
                 aStr += duia.Text;
                 //添加新的文本信息
-                StreamWriter sw = new StreamWriter(uPath, false, System.Text.Encoding.Default);
+                StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
                 //开始写入
                 sw.Write(aStr);
                 //清空缓冲区
@@ -758,15 +758,13 @@ namespace LianjiaCrawl
 
         private void showTimerSessage()
         {
-            DuiTextBox duia = ((DuiTextBox)lp_panel.DUIControls[0]);
-            duia.Text = "";
-            UpdateUIDelegate("duia","规避采集机制，系统自动分配"+ perUtils.StopTimeLength +"秒后继续获取数据，请稍后...." +"\r\n");
+            UpdateUIDelegate("label_nowcrawlpage", "规避采集机制，系统自动分配"+ perUtils.StopTimeLength +"秒后继续获取数据，请稍后....");
             for (int i = 0; i < int.Parse(perUtils.StopTimeLength); i++)
             {
-                UpdateUIDelegate("duia", "请耐心等待，"+(int.Parse(perUtils.StopTimeLength)-(i+1)).ToString() +"秒后系统继续执行采集！"+ "\r\n");
+                UpdateUIDelegate("label_nowcrawlpage", "请耐心等待，"+(int.Parse(perUtils.StopTimeLength)-(i+1)).ToString() +"秒后系统继续执行采集！");
                 Thread.Sleep(1000);
             }
-            UpdateUIDelegate("duia", "继续采集开始！" + "\r\n");
+            UpdateUIDelegate("label_nowcrawlpage", "继续采集开始！");
 
         }
 
