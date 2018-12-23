@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("LianjiaCrawl")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("链家房源销售人员信息采集")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("LianjiaCrawl")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2018")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("DeclineAberdeen")]
+[assembly: AssemblyProduct("链家房源销售信息采集")]
+[assembly: AssemblyCopyright("declineaberdeen@foxmail.com Copyright © Microsoft 2018")]
+[assembly: AssemblyTrademark("SunkeJava")]
 [assembly: AssemblyCulture("")]
 
 //将 ComVisible 设置为 false 将使此程序集中的类型

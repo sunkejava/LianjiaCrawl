@@ -378,7 +378,7 @@
             this.AnimationType = LayeredSkin.Forms.AnimationTypes.GradualCurtainEffect;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.BackColor = System.Drawing.Color.MistyRose;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(466, 294);
             this.Controls.Add(this.layeredButton_close);
