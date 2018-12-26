@@ -242,6 +242,7 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
+                writeLog(new StringBuilder().Append("获取网页(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
                 throw new Exception("获取网页("+url+")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
             }
 
@@ -306,6 +307,7 @@ namespace LianjiaCrawl
             {
                 StringBuilder errStr = null;
                 errStr.Append("获取地区或地铁线路时出错,原因为："+ex.Message + ex.StackTrace.ToString());
+                writeLog(errStr);
                 showErrorMessage(errStr);
             }
             
@@ -568,6 +570,7 @@ namespace LianjiaCrawl
                         errStr.Append("======全部代码结尾，相信解析后错误代码：" + res.OuterHtml);
                     }
                 }
+                writeLog(errStr);
                 showErrorMessage(errStr);
                 threadIsEnd = true;
             }
@@ -792,7 +795,27 @@ namespace LianjiaCrawl
                     break;
             }
         }
-
+        private bool writeLog(StringBuilder sb)
+        {
+            try
+            {
+                string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "Bugerr.in";
+                String aStr = sb.ToString();
+                //添加新的文本信息
+                StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
+                //开始写入
+                sw.Write(aStr);
+                //清空缓冲区
+                sw.Flush();
+                //关闭流
+                sw.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("写出错误日志失败，原因为："+ex.Message);
+            }
+        }
         #endregion
 
 
