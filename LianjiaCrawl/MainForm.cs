@@ -850,7 +850,7 @@ namespace LianjiaCrawl
             try
             {
                 string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "Bugerr.ini";
-                String aStr = sb.ToString();
+                String aStr = sb.ToString()+DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 //添加新的文本信息
                 StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
                 //开始写入
