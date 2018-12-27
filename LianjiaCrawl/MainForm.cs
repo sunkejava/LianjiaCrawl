@@ -256,7 +256,7 @@ namespace LianjiaCrawl
                 WebRequest myReq = WebRequest.Create(uri);
                 WebResponse result = myReq.GetResponse();
                 Stream receviceStream = result.GetResponseStream();
-                StreamReader readerOfStream = new StreamReader(receviceStream, System.Text.Encoding.GetEncoding("UTF8"));
+                StreamReader readerOfStream = new StreamReader(receviceStream, Encoding.UTF8);
                 string strHTML = readerOfStream.ReadToEnd();
                 readerOfStream.Close();
                 receviceStream.Close();
@@ -283,7 +283,7 @@ namespace LianjiaCrawl
                 myReq.Headers.Add("Accept-Language", "zh-cn,en-us;q=0.5");
                 HttpWebResponse result = (HttpWebResponse)myReq.GetResponse();
                 Stream receviceStream = result.GetResponseStream();
-                StreamReader readerOfStream = new StreamReader(receviceStream, System.Text.Encoding.GetEncoding("UTF8"));
+                StreamReader readerOfStream = new StreamReader(receviceStream, Encoding.UTF8);
                 string strHTML = readerOfStream.ReadToEnd();
                 readerOfStream.Close();
                 receviceStream.Close();
@@ -849,7 +849,7 @@ namespace LianjiaCrawl
         {
             try
             {
-                string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "Bugerr.in";
+                string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "Bugerr.ini";
                 String aStr = sb.ToString();
                 //添加新的文本信息
                 StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
