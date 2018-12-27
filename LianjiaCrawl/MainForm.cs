@@ -242,10 +242,60 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
-                writeLog(new StringBuilder().Append("获取网页(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
-                throw new Exception("获取网页("+url+")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
+                writeLog(new StringBuilder().Append("获取网页ByWebClient(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
+                //throw new Exception("获取网页("+url+")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
+                return GetWebStringForWebRequest(url);
             }
 
+        }
+        public string GetWebStringForWebRequest(String url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                WebRequest myReq = WebRequest.Create(uri);
+                WebResponse result = myReq.GetResponse();
+                Stream receviceStream = result.GetResponseStream();
+                StreamReader readerOfStream = new StreamReader(receviceStream, System.Text.Encoding.GetEncoding("UTF8"));
+                string strHTML = readerOfStream.ReadToEnd();
+                readerOfStream.Close();
+                receviceStream.Close();
+                result.Close();
+                return strHTML;
+            }
+            catch (Exception ex)
+            {
+                writeLog(new StringBuilder().Append("获取网页ByWebRequest(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
+                return GetWebStringForHttpWebRequest(url);
+            }
+            
+        }
+
+        public string GetWebStringForHttpWebRequest(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create(uri);
+                myReq.UserAgent = "User-Agent:Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705";
+                myReq.Accept = "*/*";
+                myReq.KeepAlive = true;
+                myReq.Headers.Add("Accept-Language", "zh-cn,en-us;q=0.5");
+                HttpWebResponse result = (HttpWebResponse)myReq.GetResponse();
+                Stream receviceStream = result.GetResponseStream();
+                StreamReader readerOfStream = new StreamReader(receviceStream, System.Text.Encoding.GetEncoding("UTF8"));
+                string strHTML = readerOfStream.ReadToEnd();
+                readerOfStream.Close();
+                receviceStream.Close();
+                result.Close();
+
+                return strHTML;
+            }
+            catch (Exception ex)
+            {
+                writeLog(new StringBuilder().Append("获取网页ByHttpWebRequest(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
+                throw new Exception("采集指定网址异常，" + ex.Message);
+            }
         }
         /// <summary>
         /// 获取地区及地铁信息
