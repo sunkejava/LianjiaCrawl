@@ -447,8 +447,7 @@
             this.AnimationType = LayeredSkin.Forms.AnimationTypes.Custom;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Gray;
-            this.BackgroundImage = global::LianjiaCrawl.Properties.Resources._471821;
+            this.BackColor = System.Drawing.Color.Snow;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1023, 674);
             this.Controls.Add(this.layeredButton1);
@@ -464,7 +463,6 @@
             this.Controls.Add(this.layeredLabel2);
             this.Controls.Add(this.layeredButton_close);
             this.Controls.Add(this.layeredButton_mini);
-            this.EnableAnimation = false;
             this.HaloColor = System.Drawing.Color.Gray;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;

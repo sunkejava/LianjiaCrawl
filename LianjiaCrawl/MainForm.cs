@@ -68,9 +68,12 @@ namespace LianjiaCrawl
             {
                 this.BackgroundImage = Image.FromFile(perUtils.BackImg);
             }
+            if (perUtils.Animation != "")
+            {
+                checkAnimation();
+            }
             Thread at = new Thread(new ThreadStart(getAreasAndSubway));
             at.Start();
-            //getAreasAndSubway();
         }
 
         private void Button_area_Click(object sender, EventArgs e)
@@ -106,7 +109,7 @@ namespace LianjiaCrawl
                         var tags = item.InnerText;
                         var name = item.InnerText;
                         Entity.SelectEntity area = new Entity.SelectEntity();
-                        area.Url = "https://bj.lianjia.com" + aurl;
+                        area.Url = "https://" + new Uri(nowGetUrl).Host + aurl;
                         area.Rtag = tags;
                         area.Name = name;
                         selectChidens.Add(area);
@@ -141,14 +144,17 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
+                StringBuilder errStr = null;
                 if (ex.Message.Contains("原因为"))
                 {
-                    showErrorMessage(ex.Message);
+                    errStr.Append(ex.Message);
+                    
                 }
                 else
                 {
-                    showErrorMessage("获取"+yjname+"的房源信息或下级信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                    errStr.Append("获取" + yjname + "的房源信息或下级信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                 }
+                showErrorMessage(errStr);
             }
         }
 
@@ -175,14 +181,17 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
+                StringBuilder errStr = null;
                 if (ex.Message.Contains("原因为"))
                 {
-                    showErrorMessage(ex.Message);
+                    errStr.Append(ex.Message);
+                    
                 }
                 else
                 {
-                    showErrorMessage("获取" + ejname + "的房源信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                    errStr.Append("获取" + ejname + "的房源信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                 }
+                showErrorMessage(errStr);
             }
             
         }
@@ -211,7 +220,9 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
-                showErrorMessage(ex.Message + ex.StackTrace.ToString());
+                StringBuilder errStr = null;
+                errStr.Append(ex.Message + ex.StackTrace.ToString());
+                showErrorMessage(errStr);
             }
         }
         #endregion
@@ -231,6 +242,7 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
+                writeLog(new StringBuilder().Append("获取网页(" + url + ")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString()));
                 throw new Exception("获取网页("+url+")内容失败，原因为：" + ex.Message + ex.StackTrace.ToString());
             }
 
@@ -293,7 +305,10 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
-                showErrorMessage("获取地区或地铁线路时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                StringBuilder errStr = null;
+                errStr.Append("获取地区或地铁线路时出错,原因为："+ex.Message + ex.StackTrace.ToString());
+                writeLog(errStr);
+                showErrorMessage(errStr);
             }
             
         }
@@ -427,8 +442,32 @@ namespace LianjiaCrawl
                 duia.Multiline = true;
                 duia.Size = new Size(999, 389);
                 duia.Text = "";
-                string pcount = "";
-                string npage = "";
+                string pcount = "0";
+                string npage = "0";
+                string fycount = "0";
+                //当前总共找到XX个房源信息
+                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
+                if (res != null && res.SelectSingleNode(@"h2") != null)
+                {
+                    var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
+                    foreach (var item in astr)
+                    {
+                        fycount = item.InnerText;
+                        findCountHouse = "共找到" + fycount.ToString() + "套 " + yjname + " " + ejname + "在售二手房源";
+                    }
+                }
+                else
+                {
+                    res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[2]");
+                    var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
+                    foreach (var item in astr)
+                    {
+                        fycount = item.InnerText;
+                        findCountHouse = "共找到" + fycount.ToString() + "套 " + yjname + " " + ejname + "在售二手房源";
+                    }
+                }
+                UpdateUIDelegate("label_count", findCountHouse);
+                fycount = fycount.TrimStart().TrimEnd();
                 //当前页数、总页数 规则1
                 res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[8]/div[2]");
                 if (res == null)
@@ -442,46 +481,46 @@ namespace LianjiaCrawl
                     pcount = "1";
                     waitGetPageCount = 1;
                     npage = "1";
+                    if (fycount == "0")
+                    {
+                        pcount = "0";
+                        waitGetPageCount = 0;
+                        npage = "0";
+                    }
                 }
                 else
                 {
-                    string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
-                    JObject jo = (JObject)JsonConvert.DeserializeObject(str);
-                    
-                    foreach (var item in jo)
+                    if (fycount != "0")
                     {
-                        if (item.Key.Contains("totalPage"))
+                        string str = res.SelectNodes("div")[0].Attributes["page-data"].Value;
+                        JObject jo = (JObject)JsonConvert.DeserializeObject(str);
+
+                        foreach (var item in jo)
                         {
-                            pcount = item.Value.ToString();
-                            waitGetPageCount = int.Parse(pcount);
-                        }
-                        else
-                        {
-                            npage = item.Value.ToString();
+                            if (item.Key.Contains("totalPage"))
+                            {
+                                pcount = item.Value.ToString();
+                                waitGetPageCount = int.Parse(pcount);
+                            }
+                            else
+                            {
+                                npage = item.Value.ToString();
+                            }
                         }
                     }
+                    else
+                    {
+                        waitGetPageCount = 0;
+                    }
                 }
-                
                 UpdateUIDelegate("label_pagecount", "总页数：" + pcount);
                 //label_pagecount.Text = "总页数：" + pcount;
                 UpdateUIDelegate("label_nowcrawlpage", "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！");
                 //label_nowcrawlpage.Text = "当前正在采集" + yjname + ejname + "第 " + npage + " 页的房源信息！";
-                //当前总共找到XX个房源信息
-                res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]/div[1]");
-                if (res != null)
-                {
-                    var astr = res.SelectSingleNode(@"h2").SelectNodes("span");
-                    foreach (var item in astr)
-                    {
-                        var count = item.InnerText;
-                        findCountHouse = "共找到" + count.ToString() + "套 "+yjname+" "+ejname+"在售二手房源";
-                    }
-                }
-                UpdateUIDelegate("label_count", findCountHouse);
                 //this.label_count.Text = findCountHouse;
                 //获取所有房源信息
                 res = doc.DocumentNode.SelectSingleNode(@"/html[1]/body[1]/div[4]/div[1]");
-                if (res != null)
+                if (res != null && fycount != "0")
                 {
                     var astr = res.SelectSingleNode(@"ul[1]").SelectNodes("li");
                     int i = 1;
@@ -514,23 +553,25 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
+                StringBuilder errStr = null;
                 if (ex.Message.Contains("原因为"))
                 {
-                    showErrorMessage(ex.Message);
+                    errStr.Append(ex.Message);
                 }
                 else
                 {
-                    string errStr = "获取房源(" + nowGetUrl + "）信息出错,原因为：" + ex.Message + ex.StackTrace.ToString();
+                    errStr.Append("获取房源(" + nowGetUrl + "）信息出错,原因为：" + ex.Message + ex.StackTrace.ToString());
                     if (doc != null)
                     {
-                        errStr += "<<<<<<<<<<<<<<<<<<<分析全部代码：" + doc.Text;
+                        errStr.Append("<<<<<<<<<<<<<<<<<<<分析全部代码：" + doc.Text);
                     }
                     if (res != null)
                     {
-                        errStr += "======全部代码结尾，相信解析后错误代码：" + res.OuterHtml;
+                        errStr.Append("======全部代码结尾，相信解析后错误代码：" + res.OuterHtml);
                     }
-                    showErrorMessage(errStr);
                 }
+                writeLog(errStr);
+                showErrorMessage(errStr);
                 threadIsEnd = true;
             }
             
@@ -544,7 +585,7 @@ namespace LianjiaCrawl
             try
             {
                 //暂停时间
-                Thread.Sleep(int.Parse(perUtils.StopTimeLength));
+                Thread.Sleep(int.Parse(perUtils.StopTimeLength)*10);
                 var htmlStr = GetWebClient(url);
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(htmlStr);
@@ -630,7 +671,9 @@ namespace LianjiaCrawl
             }
             catch (Exception ex)
             {
-                showErrorMessage("更新控件信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                StringBuilder errStr = null;
+                errStr.Append("更新控件信息时出错,原因为：" + ex.Message + ex.StackTrace.ToString());
+                showErrorMessage(errStr);
             }
         }
         /// <summary>
@@ -675,7 +718,9 @@ namespace LianjiaCrawl
             }
             catch (Exception e)
             {
-                showErrorMessage("写出信息失败，原因为："+e.Message+e.StackTrace.ToString());
+                StringBuilder errStr = null;
+                errStr.Append("写出信息失败，原因为：" + e.Message + e.StackTrace.ToString());
+                showErrorMessage(errStr);
             }
         }
         private void GetAllHouseSaleDetail()
@@ -686,8 +731,11 @@ namespace LianjiaCrawl
             {
                     if (threadIsEnd)
                     {
-                        //采集暂停时间段，避免次数过多造成访问失败
-                        Thread.Sleep(int.Parse(perUtils.StopTimeLength)*1000);
+                    //采集暂停时间段，避免次数过多造成访问失败
+                    //Thread.Sleep(int.Parse(perUtils.StopTimeLength)*1000);
+                        Thread st =new Thread(showTimerSessage);
+                        st.Start();
+                        st.Join();
                         var htmlStr = GetWebClient(nowGetUrl + "pg" + i.ToString() + "/");
                         HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                         doc.LoadHtml(htmlStr);
@@ -696,6 +744,7 @@ namespace LianjiaCrawl
                         ds.doc = doc;
                         threadIsEnd = false;
                         t.Start(ds);
+                        t.Join();
                         i++;
                     }
                     else
@@ -704,13 +753,71 @@ namespace LianjiaCrawl
                     }
             }
         }
-        private void showErrorMessage(string errStr)
+        private void showErrorMessage(StringBuilder errStr)
         {
             MessageForm errFrom = new MessageForm(errStr);
             errFrom.ShowDialog();
         }
+
+        private void showTimerSessage()
+        {
+            UpdateUIDelegate("label_nowcrawlpage", "规避采集机制，系统自动分配"+ perUtils.StopTimeLength +"秒后继续获取数据，请稍后....");
+            for (int i = 0; i < int.Parse(perUtils.StopTimeLength); i++)
+            {
+                UpdateUIDelegate("label_nowcrawlpage", "请耐心等待，"+(int.Parse(perUtils.StopTimeLength)-(i+1)).ToString() +"秒后系统继续执行采集！");
+                Thread.Sleep(1000);
+            }
+            UpdateUIDelegate("label_nowcrawlpage", "继续采集开始！");
+
+        }
+
+        private void checkAnimation()
+        {
+            switch (int.Parse(perUtils.Animation))
+            {
+                case 5:
+                    this.AnimationType = AnimationTypes.Custom;
+                    break;
+                case 2:
+                    this.AnimationType = AnimationTypes.FadeinFadeoutEffect;
+                    break;
+                case 1:
+                    this.AnimationType = AnimationTypes.GradualCurtainEffect;
+                    break;
+                case 3:
+                    this.AnimationType = AnimationTypes.RotateZoomEffect;
+                    break;
+                case 4:
+                    this.AnimationType = AnimationTypes.ThreeDTurn;
+                    break;
+                default:
+                    this.AnimationType = AnimationTypes.ZoomEffect;
+                    break;
+            }
+        }
+        private bool writeLog(StringBuilder sb)
+        {
+            try
+            {
+                string uPath = System.AppDomain.CurrentDomain.BaseDirectory + "Bugerr.in";
+                String aStr = sb.ToString();
+                //添加新的文本信息
+                StreamWriter sw = new StreamWriter(uPath, true, System.Text.Encoding.Default);
+                //开始写入
+                sw.Write(aStr);
+                //清空缓冲区
+                sw.Flush();
+                //关闭流
+                sw.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("写出错误日志失败，原因为："+ex.Message);
+            }
+        }
         #endregion
 
-        
+
     }
 }

@@ -13,8 +13,8 @@ namespace LianjiaCrawl
 {
     public partial class MessageForm : LayeredForm
     {
-        private static string MessageStr = "";
-        public MessageForm(string MessageStrs)
+        private static StringBuilder MessageStr = null;
+        public MessageForm(StringBuilder MessageStrs)
         {
             InitializeComponent();
             MessageStr = MessageStrs;
@@ -27,7 +27,7 @@ namespace LianjiaCrawl
             duia.Dock = DockStyle.Fill;
             duia.Multiline = true;
             duia.Size = new Size(395, 123);
-            duia.Text = MessageStr;
+            duia.Text = MessageStr.ToString();
         }
 
         private void Button_ok_Click(object sender, EventArgs e)

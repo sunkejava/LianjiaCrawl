@@ -20,7 +20,7 @@ namespace LianjiaCrawl
         private string backImg = "";
         private string radius = "15";
         private string opacity = "1";
-        private string animation = "GradualCurtainEffect";
+        private string animation = "0";
         private string filePath = "";
         private string stopTimeLength = "";
         public PropertsUtils()
